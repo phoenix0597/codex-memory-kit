@@ -1,0 +1,27 @@
+# Current Work Queue
+
+This file is the current decomposed task queue for active implementation work.
+Keep it short and update it when the practical next steps materially change.
+
+## Current Status
+
+- Last completed step: <describe the latest completed step>
+- Current codebase state: <briefly summarize where the implementation stands>
+- Current known weak area: <state the main current gap>
+
+## Next Step
+
+1. <next step 1>
+2. <next step 2>
+3. <next step 3>
+
+## After That
+
+1. <later step 1>
+2. <later step 2>
+3. <later step 3>
+
+## Parking Lot
+
+- <parked idea 1>
+- <parked idea 2>

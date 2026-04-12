@@ -1,0 +1,34 @@
+# AGENTS.md
+
+Global instructions for work inside `{{HOME_DIR}}`.
+
+## Session Startup
+
+At the start of a session, read:
+
+1. `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
+2. `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
+
+If you are working inside a repository or project directory:
+
+3. Read the nearest repo-local `AGENTS.md` if it exists.
+4. Read the repo-local `START-HERE.md` if it exists.
+
+## Scope
+
+This file is the global layer for work under `{{HOME_DIR}}`.
+
+- Keep this file short and cross-project only.
+- Do not store project-specific architecture or implementation history here.
+- Repo-local `AGENTS.md` files are allowed to add project-specific startup order, memory rules, and conventions.
+
+## Memory
+
+- Cross-project durable rules live in `{{GLOBAL_MEMORY_DIR}}/`.
+- Project-specific durable rules should live in the project's `assistant-memory.md`.
+- Project chronological and thematic notes should live in the project's `memory/` directory.
+- Prefer links between these layers instead of duplicating large text blocks.
+
+## New Projects
+
+Use the memory kit's `init-project.sh` to bootstrap repo-local memory in a new repository.

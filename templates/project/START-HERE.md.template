@@ -1,0 +1,42 @@
+# START HERE
+
+This file is the canonical bootstrap point for resuming work on this project in a new session.
+It is an index, not a source of truth for project rules or architecture decisions.
+
+## Read These Files First
+
+If a new session starts in this project, read these files before continuing work:
+
+- `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
+- `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
+- `{{REPO_ROOT}}/AGENTS.md`
+- `{{REPO_ROOT}}/assistant-memory.md`
+- `{{REPO_ROOT}}/technical-specification-mvp.md` if it exists
+- `{{REPO_ROOT}}/memory/current-work-queue.md` if it exists
+- `{{REPO_ROOT}}/START-HERE.md`
+- `{{REPO_ROOT}}/memory/YYYY-MM-DD.md` for today if it exists, then the latest recent daily file if needed
+
+## Resume Instruction
+
+When resuming:
+
+1. Read the files listed above in order.
+2. Treat `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md` as the source of truth for cross-project collaboration rules.
+3. Treat `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md` as the source of truth for the shared memory layering used across projects.
+4. Treat `{{REPO_ROOT}}/AGENTS.md` as the repo-local startup and memory-protocol file.
+5. Treat `{{REPO_ROOT}}/assistant-memory.md` as the source of truth for project architecture decisions.
+6. Treat `{{REPO_ROOT}}/technical-specification-mvp.md` as the source of truth for product and implementation requirements when it exists.
+7. Treat `{{REPO_ROOT}}/memory/current-work-queue.md` as the current decomposed implementation queue when it exists.
+8. Use daily files in `{{REPO_ROOT}}/memory/` for recent chronological context and follow links from them into topic files when needed.
+
+## End-Of-Discussion Reminder
+
+1. Update the relevant source-of-truth files if the current state, durable decisions, or recommended next step changed.
+2. Follow the durable project process agreements from `{{REPO_ROOT}}/assistant-memory.md`.
+3. Check whether any new material should be added to `{{REPO_ROOT}}/article-notes.md` when that file exists.
+
+## Recommended Next Step
+
+- Do not keep the live step-by-step queue in this file.
+- Use `{{REPO_ROOT}}/memory/current-work-queue.md` for the current decomposed implementation plan and preferred next steps.
+- Keep this file as a bootstrap index only.

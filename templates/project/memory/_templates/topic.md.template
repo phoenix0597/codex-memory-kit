@@ -1,0 +1,32 @@
+---
+title: <Title>
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+status: active
+tags: [tag1, tag2]
+related:
+  - memory/YYYY-MM-DD.md
+---
+
+# <Title>
+
+## Summary
+Short summary in 2-5 lines.
+
+## Context
+Why this topic came up.
+
+## Decisions
+- Decision 1
+- Decision 2
+
+## Rationale
+Why this approach was chosen.
+
+## Open Questions
+- Question 1
+- Question 2
+
+## Related
+- `memory/YYYY-MM-DD.md`
+- `assistant-memory.md`

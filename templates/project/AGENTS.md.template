@@ -1,0 +1,53 @@
+# AGENTS.md
+
+Repo-local instructions for agent sessions in this project.
+
+## Session Startup
+
+At the start of a new session, read these files in order:
+
+1. `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
+2. `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
+3. `{{REPO_ROOT}}/AGENTS.md`
+4. `{{REPO_ROOT}}/START-HERE.md`
+5. `{{REPO_ROOT}}/assistant-memory.md`
+6. `{{REPO_ROOT}}/technical-specification-mvp.md` if it exists
+7. `{{REPO_ROOT}}/memory/current-work-queue.md` if it exists
+8. `memory/YYYY-MM-DD.md` for today if it exists, then the latest recent daily file if needed
+9. Any topic files linked from the relevant daily file
+
+## Canonical File Roles
+
+- `technical-specification-mvp.md` - source of truth for product and implementation requirements when present
+- `assistant-memory.md` - source of truth for durable project architecture decisions and process agreements
+- `START-HERE.md` - bootstrap index and resume order, not a source of truth for project requirements or architecture
+- `memory/current-work-queue.md` - current decomposed implementation queue and preferred next steps; working context, not a durable source of truth
+- `memory/YYYY-MM-DD.md` - short chronological working notes, not a durable source of truth
+- `memory/topic-<slug>.md` - longer thematic notes and rationale; useful recurring context, but not a replacement for the canonical durable files above
+
+## Project Memory Convention
+
+Use a lightweight three-layer working-memory model:
+
+1. Daily files in `memory/YYYY-MM-DD.md`
+2. Topic files in `memory/topic-<slug>.md`
+3. Durable distilled memory in `assistant-memory.md`
+
+This repo-local scheme is the project-level implementation of the shared cross-project memory convention from `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
+
+Rules:
+
+- Write new discussion summaries to the current daily file first.
+- Create or update a topic file when a theme is likely to return, needs rationale, or grows beyond a short daily note.
+- Keep daily files short; store the summary there and link to the topic file when one exists.
+- Prefer links and short pointers between memory layers instead of copying the same rule or decision into multiple files.
+- Do not duplicate large text blocks across daily files, topic files, `assistant-memory.md`, and the technical specification.
+- Keep `assistant-memory.md` focused on durable project rules and architecture, not temporary discussion logs.
+
+## End Of Discussion
+
+Before closing a substantial discussion or implementation step:
+
+1. Update the relevant source-of-truth file if a durable rule or decision changed.
+2. Update today's daily file if the discussion created useful future context.
+3. Update or create a topic file if the discussion is likely to recur.
