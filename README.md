@@ -45,6 +45,16 @@ After installation, the expected runtime paths are:
 - Installation should be idempotent.
 - Verification should fail loudly on broken startup chains or missing required files.
 
+## Platform Support
+
+Current intended support:
+
+- Linux
+- macOS
+- Windows via WSL
+
+Native Windows shell environments are currently out of scope. The kit relies on POSIX-style shell scripts and Unix-like path semantics.
+
 ## Template Variables
 
 Templates may use the following placeholders:
