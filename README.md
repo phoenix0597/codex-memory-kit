@@ -2,6 +2,8 @@
 
 Portable bootstrap kit for reproducing the Codex memory structure on any machine while preserving the expected runtime paths.
 
+Russian version: [README.ru.md](README.ru.md)
+
 ## Purpose
 
 This kit installs and verifies a three-layer Codex memory architecture:
@@ -64,6 +66,17 @@ Templates may use the following placeholders:
 - `{{GLOBAL_MEMORY_DIR}}`
 - `{{REPO_ROOT}}`
 - `{{PROJECT_NAME}}`
+
+## Default Path Resolution
+
+Unless overridden explicitly by script arguments:
+
+- `CODEX_DIR` defaults to `{{HOME_DIR}}/.codex`
+- `GLOBAL_MEMORY_DIR` defaults to `{{CODEX_DIR}}/memories`
+
+In the usual case, the effective global memory path is:
+
+- `~/.codex/memories`
 
 ## Bootstrap On A New Machine
 
