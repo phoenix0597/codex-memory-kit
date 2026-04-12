@@ -55,6 +55,42 @@ Templates may use the following placeholders:
 - `{{REPO_ROOT}}`
 - `{{PROJECT_NAME}}`
 
+## Bootstrap On A New Machine
+
+Clone the repository first. The scripts live inside this repo, so there is nothing to run until the kit has been cloned to a local path.
+
+Recommended clone path:
+
+```bash
+git clone git@github.com:phoenix0597/codex-memory-kit.git ~/.codex/codex-memory-kit
+cd ~/.codex/codex-memory-kit
+```
+
+This location is recommended because it keeps the source/tooling repo next to the live Codex runtime directory without mixing it into `~/.codex/memories/`.
+
+## Where To Clone
+
+You do not have to clone the repo specifically into `~/.codex/codex-memory-kit`.
+
+The scripts render runtime files from the values passed via `--home`, `--repo`, and related arguments, not from the clone location itself. So this also works:
+
+```bash
+git clone git@github.com:phoenix0597/codex-memory-kit.git /some/other/path/codex-memory-kit
+cd /some/other/path/codex-memory-kit
+```
+
+As long as you either:
+
+- run the scripts from inside the cloned repo; or
+- pass `--source-root /absolute/path/to/codex-memory-kit`
+
+the rendered runtime paths will still be correct.
+
+In short:
+
+- clone location = where the source/tooling repo lives
+- `--home` and `--repo` = where runtime files are created
+
 ## Installation
 
 Install the global layer and home bootstrap:
@@ -98,10 +134,11 @@ Verify the resulting structure:
 
 ## Expected Workflow
 
-1. Install global memory and home bootstrap once per machine.
-2. Initialize project-local memory once per repository.
-3. Run checks after installation or after template changes.
-4. Keep accumulated daily/topic notes under normal project version control, not inside the kit.
+1. Clone this repository to a local source path.
+2. Install global memory and home bootstrap once per machine.
+3. Initialize project-local memory once per repository.
+4. Run checks after installation or after template changes.
+5. Keep accumulated daily/topic notes under normal project version control, not inside the kit.
 
 ## Non-Goals
 
@@ -130,6 +167,7 @@ Verify the resulting structure:
 - `install.sh` is responsible only for home/global runtime paths.
 - `init-project.sh` is responsible only for repo-local runtime paths.
 - `check.sh` should validate the runtime structure, not the source template tree.
+- The clone location of the kit repo is independent from the runtime target paths.
 - No script should assume a fixed username such as `phoenix`; all rendered absolute paths must derive from the provided `--home` or `--repo`.
 
 ### Idempotency
