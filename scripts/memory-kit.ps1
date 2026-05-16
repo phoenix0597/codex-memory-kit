@@ -33,7 +33,7 @@ $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $DefaultSourceRoot = Split-Path -Parent $ScriptDir
-$Utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
+$Utf8WithBom = New-Object System.Text.UTF8Encoding -ArgumentList $true
 
 function Show-Usage {
   @"
@@ -58,18 +58,32 @@ function Resolve-KitPath {
   }
 
   if ($PathValue -eq "~") {
-    return [System.IO.Path]::GetFullPath($HOME)
+    return Normalize-ResolvedPath ([System.IO.Path]::GetFullPath($HOME))
   }
 
   if ($PathValue.StartsWith("~/") -or $PathValue.StartsWith("~\")) {
-    return [System.IO.Path]::GetFullPath((Join-Path $HOME $PathValue.Substring(2)))
+    return Normalize-ResolvedPath ([System.IO.Path]::GetFullPath((Join-Path $HOME $PathValue.Substring(2))))
   }
 
   if ([System.IO.Path]::IsPathRooted($PathValue)) {
-    return [System.IO.Path]::GetFullPath($PathValue)
+    return Normalize-ResolvedPath ([System.IO.Path]::GetFullPath($PathValue))
   }
 
-  return [System.IO.Path]::GetFullPath((Join-Path $BasePath $PathValue))
+  return Normalize-ResolvedPath ([System.IO.Path]::GetFullPath((Join-Path $BasePath $PathValue)))
+}
+
+function Normalize-ResolvedPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$PathValue
+  )
+
+  $root = [System.IO.Path]::GetPathRoot($PathValue)
+  if ($PathValue.Equals($root, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return $PathValue
+  }
+
+  return $PathValue.TrimEnd([char[]]@("\", "/"))
 }
 
 function Join-KitPath {
@@ -101,7 +115,7 @@ function Write-KitStatus {
   }
 }
 
-function Write-Utf8NoBom {
+function Write-Utf8WithBom {
   param(
     [Parameter(Mandatory = $true)]
     [string]$Path,
@@ -109,7 +123,32 @@ function Write-Utf8NoBom {
     [string]$Content
   )
 
-  [System.IO.File]::WriteAllText($Path, $Content, $Utf8NoBom)
+  [System.IO.File]::WriteAllText($Path, $Content, $Utf8WithBom)
+}
+
+function Normalize-RenderedWindowsPaths {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Content,
+    [Parameter(Mandatory = $true)]
+    [hashtable]$Variables
+  )
+
+  foreach ($value in $Variables.Values) {
+    if ([string]::IsNullOrWhiteSpace([string]$value)) {
+      continue
+    }
+
+    $path = [string]$value
+    $backtick = [char]96
+    $pattern = [regex]::Escape($path) + "[^$backtick\s,)]*"
+    $Content = [regex]::Replace($Content, $pattern, {
+      param($match)
+      $match.Value.Replace("/", "\")
+    })
+  }
+
+  return $Content
 }
 
 function Get-EffectiveHome {
@@ -182,6 +221,7 @@ function Render-Template {
   foreach ($name in $Variables.Keys) {
     $content = $content.Replace("{{$name}}", [string]$Variables[$name])
   }
+  $content = Normalize-RenderedWindowsPaths -Content $content -Variables $Variables
 
   if ($content -match "{{[A-Z_][A-Z0-9_]*}}") {
     throw "После рендера остались незаполненные плейсхолдеры: $Source"
@@ -207,7 +247,7 @@ function Render-Template {
     New-Item -ItemType Directory -Force -Path $parent | Out-Null
   }
 
-  Write-Utf8NoBom -Path $Destination -Content $content
+  Write-Utf8WithBom -Path $Destination -Content $content
 
   if ($exists -and $Force) {
     Write-KitStatus "OVERWRITE $Destination"
@@ -249,7 +289,7 @@ function Render-DailyFile {
 
   $parent = Split-Path -Parent $Destination
   New-Item -ItemType Directory -Force -Path $parent | Out-Null
-  Write-Utf8NoBom -Path $Destination -Content $content
+  Write-Utf8WithBom -Path $Destination -Content $content
 
   if ($exists -and $Force) {
     Write-KitStatus "OVERWRITE $Destination"
