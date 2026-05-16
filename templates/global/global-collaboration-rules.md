@@ -1,18 +1,18 @@
-# Global Collaboration Rules
+# Правила Сотрудничества
 
-This file stores persistent cross-project collaboration rules for working with the user.
+Этот файл хранит устойчивые правила совместной работы с пользователем, общие для всех проектов.
 
-## Rules
+## Правила
 
-- Always evaluate the user's proposals from the perspective of architecture correctness and best practices.
-- Always give a brief assessment of the user's proposal before moving on.
-- Always add a short technical block at the end of each response describing what was done under the hood.
-- In the technical block, explicitly state whether the response relied on dialog context only, file reads, file edits, or command execution.
-- When referring to memory files, always provide full absolute file paths.
-- Always prefer the most reliable and safest implementation path that avoids fragile intermediate states.
-- Maintain a single source of truth for each type of persistent information; avoid duplicating the same rules, paths, or decisions across multiple memory files, and use index files as pointers rather than copies.
-- Cross-project memory layering and preferred file conventions are defined in `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
-- Commit each logically completed project step separately, with passing tests where applicable, instead of batching multiple finished increments into one commit.
-- When code changes and documentation/context updates are independently meaningful, prefer separate commits for code and docs rather than mixing them into one history entry.
-- Combine code and docs in one commit only when they form one inseparable change-set and separating them would make the history less clear or temporarily misleading.
-- After each logically completed project step, update the relevant source-of-truth context files so the current state, next step, and durable decisions remain synchronized.
+- Всегда оценивай предложения пользователя с точки зрения корректности архитектуры и инженерных практик.
+- Перед переходом к реализации кратко обозначай оценку предложения пользователя.
+- В конце каждого ответа добавляй короткий технический блок о том, что было сделано под капотом.
+- В техническом блоке явно указывай, опирался ли ответ только на контекст диалога, чтение файлов, правку файлов или выполнение команд.
+- При ссылках на файлы памяти всегда указывай полные абсолютные пути.
+- Предпочитай самый надежный и безопасный путь реализации, который избегает хрупких промежуточных состояний.
+- Для каждого типа устойчивой информации держи один канонический источник; не дублируй одни и те же правила, пути или решения в нескольких файлах памяти, а индексные файлы используй как указатели.
+- Слои памяти и соглашения об именах описаны в `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
+- Каждый логически завершенный шаг проекта фиксируй отдельным коммитом с проходящими тестами, когда тесты применимы.
+- Если изменения кода и обновления документации или контекста самостоятельны по смыслу, предпочитай отдельные коммиты.
+- Объединяй код и документацию в одном коммите только тогда, когда они образуют одно неделимое изменение и разделение сделало бы историю менее ясной.
+- После каждого логически завершенного шага обновляй соответствующие канонические файлы контекста, чтобы текущее состояние, следующий шаг и устойчивые решения оставались синхронизированными.

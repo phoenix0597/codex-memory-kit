@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Usage: init-project.sh --repo <path> [--project-name <name>] [--home <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose]
+Использование: init-project.sh --repo <path> [--project-name <name>] [--home <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose]
 EOF
 }
 
@@ -72,12 +72,12 @@ if [ -z "${REPO_ROOT}" ]; then
 fi
 
 if [ "${REPO_ROOT#/}" = "$REPO_ROOT" ]; then
-  printf 'Use an absolute repository path.\n' >&2
+  printf 'Укажите абсолютный путь к репозиторию.\n' >&2
   exit 2
 fi
 
 if [ ! -d "$REPO_ROOT" ]; then
-  printf 'Repository directory not found: %s\n' "$REPO_ROOT" >&2
+  printf 'Каталог репозитория не найден: %s\n' "$REPO_ROOT" >&2
   exit 1
 fi
 
@@ -109,7 +109,7 @@ render_template() {
   local home_esc codex_esc global_esc repo_esc project_esc
 
   if [ ! -f "$src" ]; then
-    printf 'Missing template: %s\n' "$src" >&2
+    printf 'Отсутствует шаблон: %s\n' "$src" >&2
     exit 1
   fi
 
@@ -134,7 +134,7 @@ render_template() {
     "$src")
 
   if printf '%s' "$rendered" | grep -Eq '{{[A-Z_][A-Z0-9_]*}}'; then
-    printf 'Unresolved placeholder(s) after rendering %s\n' "$src" >&2
+    printf 'После рендера остались незаполненные плейсхолдеры: %s\n' "$src" >&2
     exit 1
   fi
 
@@ -163,7 +163,7 @@ render_daily_file() {
   local rendered
 
   if [ ! -f "$src" ]; then
-    printf 'Missing template: %s\n' "$src" >&2
+    printf 'Отсутствует шаблон: %s\n' "$src" >&2
     exit 1
   fi
 
@@ -193,8 +193,8 @@ render_daily_file() {
   fi
 }
 
-log "Using source root: $SOURCE_ROOT"
-log "Initializing project memory in: $REPO_ROOT"
+log "Корень исходного набора: $SOURCE_ROOT"
+log "Проектная память: $REPO_ROOT"
 
 if [ "$DRY_RUN" -eq 0 ]; then
   mkdir -p "$REPO_ROOT/memory/_templates"

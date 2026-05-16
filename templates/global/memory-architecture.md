@@ -1,47 +1,47 @@
-# Memory Architecture
+# Архитектура Памяти
 
-This file defines the preferred cross-project memory architecture for agent collaboration.
+Этот файл описывает предпочтительную архитектуру памяти для совместной работы с агентом между проектами.
 
-## Summary
+## Кратко
 
-Use a layered memory model:
+Используй слоистую модель памяти:
 
-1. Global cross-project memory in `{{GLOBAL_MEMORY_DIR}}/`
-2. Repo-local bootstrap and durable memory in the project root
-3. Repo-local chronological and thematic working memory in `memory/`
+1. Глобальная память для всех проектов в `{{GLOBAL_MEMORY_DIR}}/`
+2. Проектный стартовый слой и долговременная память в корне репозитория
+3. Проектная хронологическая и тематическая рабочая память в `memory/`
 
-## Global Layer
+## Глобальный Слой
 
-Use the global memory directory only for information that should apply across projects.
+Глобальный каталог памяти предназначен только для сведений, которые должны действовать между проектами.
 
-- `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md` - cross-project collaboration rules
-- `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md` - shared memory structure and naming convention
-- `{{HOME_DIR}}/AGENTS.md` - optional global startup index for all work under the home directory
+- `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md` - правила сотрудничества для всех проектов
+- `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md` - общая структура памяти и соглашение об именах
+- `{{HOME_DIR}}/AGENTS.md` - необязательный глобальный стартовый индекс для работы внутри домашнего каталога
 
-Do not store project-specific architecture or implementation history here.
+Не храни здесь проектную архитектуру или историю реализации конкретного проекта.
 
-## Project Layer
+## Проектный Слой
 
-Preferred project-local convention:
+Предпочтительное соглашение внутри проекта:
 
-- `AGENTS.md` - repo-local startup order and memory protocol
-- `START-HERE.md` - bootstrap index
-- `assistant-memory.md` - durable project architecture decisions and process agreements
-- `memory/current-work-queue.md` - current decomposed implementation queue and preferred next steps
-- `memory/YYYY-MM-DD.md` - daily chronological notes
-- `memory/topic-<slug>.md` - recurring topics, rationale, and evolving thematic notes
+- `AGENTS.md` - локальный порядок старта и протокол памяти
+- `START-HERE.md` - стартовый индекс
+- `assistant-memory.md` - долговременные архитектурные решения и рабочие соглашения проекта
+- `memory/current-work-queue.md` - текущая декомпозированная очередь реализации и рекомендуемые следующие шаги
+- `memory/YYYY-MM-DD.md` - краткие хронологические заметки за день
+- `memory/topic-<slug>.md` - повторяющиеся темы, причины решений и развивающиеся тематические заметки
 
-## Rules
+## Правила
 
-- Keep one source of truth per information type.
-- Use global files only for cross-project durable rules.
-- Use `assistant-memory.md` for durable project rules and architecture, not daily logs.
-- Use `memory/current-work-queue.md` for the live decomposed implementation queue, not for durable architecture rules.
-- Use daily files for short chronological notes.
-- Use topic files for recurring themes, deeper rationale, or evolving design discussions.
-- Prefer linking between layers instead of copying large text blocks.
-- Keep names and structure consistent across projects so a new session can navigate any repository predictably.
+- Держи один канонический источник для каждого типа информации.
+- Используй глобальные файлы только для долговременных правил между проектами.
+- Используй `assistant-memory.md` для долговременных проектных правил и архитектуры, а не для ежедневных логов.
+- Используй `memory/current-work-queue.md` для текущей очереди реализации, а не для долговременных архитектурных правил.
+- Используй ежедневные файлы для коротких хронологических заметок.
+- Используй тематические файлы для повторяющихся тем, более глубокого обоснования и развивающихся обсуждений дизайна.
+- Предпочитай ссылки между слоями вместо копирования больших фрагментов текста.
+- Держи имена и структуру одинаковыми между проектами, чтобы новая сессия могла предсказуемо ориентироваться в любом репозитории.
 
-## Scaffolding
+## Создание Каркаса
 
-To bootstrap the project memory files in a new repository, use the memory kit's `init-project.sh`.
+Чтобы создать файлы проектной памяти в новом репозитории, используй `init-project.sh` в POSIX/WSL или команду `init-project` в `memory-kit.ps1` на Windows.

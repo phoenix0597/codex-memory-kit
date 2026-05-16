@@ -1,22 +1,22 @@
-# Assistant Memory: {{PROJECT_NAME}}
+# Память Ассистента: {{PROJECT_NAME}}
 
-This file stores persistent project-specific architecture decisions and local working agreements.
+Этот файл хранит устойчивые архитектурные решения проекта и локальные рабочие соглашения.
 
-## Memory References
+## Ссылки На Память
 
-- Global collaboration rules: `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
-- Global memory architecture: `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
-- Repo-local startup and memory protocol: `{{REPO_ROOT}}/AGENTS.md`
-- Project bootstrap index: `{{REPO_ROOT}}/START-HERE.md`
-- Project working-memory directory: `{{REPO_ROOT}}/memory/`
+- Глобальные правила сотрудничества: `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
+- Глобальная архитектура памяти: `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
+- Проектный старт и протокол памяти: `{{REPO_ROOT}}/AGENTS.md`
+- Стартовый индекс проекта: `{{REPO_ROOT}}/START-HERE.md`
+- Каталог рабочей памяти проекта: `{{REPO_ROOT}}/memory/`
 
-## Architectural Decisions
+## Архитектурные Решения
 
-- Project working memory should use a lightweight three-layer scheme: daily notes in `memory/YYYY-MM-DD.md`, recurring topic notes in `memory/topic-<slug>.md`, and durable distilled project memory in `assistant-memory.md`.
-- Daily files should stay short and point to topic files when discussions become recurring, architecturally meaningful, or too long for a brief chronological note.
-- The project memory scheme should remain compatible with the shared cross-project convention from `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`: global rules in the global memory directory, durable project rules in `assistant-memory.md`, and project working context in `memory/`.
+- Проектная рабочая память должна использовать легкую трехслойную схему: ежедневные заметки в `memory/YYYY-MM-DD.md`, повторяющиеся тематические заметки в `memory/topic-<slug>.md` и сжатая долговременная память проекта в `assistant-memory.md`.
+- Ежедневные файлы должны оставаться короткими и ссылаться на тематические файлы, когда обсуждения становятся повторяющимися, архитектурно значимыми или слишком длинными для краткой хронологической заметки.
+- Схема проектной памяти должна оставаться совместимой с общей межпроектной архитектурой из `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`: глобальные правила в глобальном каталоге памяти, долговременные проектные правила в `assistant-memory.md`, рабочий проектный контекст в `memory/`.
 
-## Project Process Agreements
+## Рабочие Соглашения Проекта
 
-- After each logically completed project step, update the relevant project context files before considering the step finished.
-- Keep one source of truth per information type; prefer links over duplicate text.
+- После каждого логически завершенного шага проекта обновляй релевантные файлы контекста до того, как считать шаг завершенным.
+- Держи один канонический источник для каждого типа информации; предпочитай ссылки дублированию текста.

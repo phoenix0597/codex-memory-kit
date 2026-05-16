@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Usage: import-memory.sh --input-dir <path> --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
+Использование: import-memory.sh --input-dir <path> --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
 EOF
 }
 
@@ -105,7 +105,7 @@ copy_tree() {
   fi
 }
 
-log "Importing memory from $INPUT_DIR"
+log "Импорт памяти: $INPUT_DIR"
 mkdir -p "$GLOBAL_MEMORY_DIR"
 
 copy_file "$INPUT_DIR/global/.codex/memories/global-collaboration-rules.md" \

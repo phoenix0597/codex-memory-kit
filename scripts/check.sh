@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Usage: check.sh --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--strict] [--verbose]
+Использование: check.sh --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--strict] [--verbose]
 EOF
 }
 
@@ -95,7 +95,7 @@ require_file() {
   if [ -f "$path" ]; then
     check_ok "$path"
   else
-    check_fail "$path" "missing required file"
+    check_fail "$path" "обязательный файл отсутствует"
   fi
 }
 
@@ -104,7 +104,7 @@ require_contains() {
   local needle=$2
   local reason=$3
   if [ ! -f "$path" ]; then
-    check_fail "$path" "missing required file"
+    check_fail "$path" "обязательный файл отсутствует"
     return
   fi
   if grep -Fq "$needle" "$path"; then
@@ -117,18 +117,18 @@ require_contains() {
 require_no_placeholders() {
   local path=$1
   if [ ! -f "$path" ]; then
-    check_fail "$path" "missing required file"
+    check_fail "$path" "обязательный файл отсутствует"
     return
   fi
   if grep -Eq '{{[A-Z_][A-Z0-9_]*}}|__PROJECT_ROOT__|__PROJECT_NAME__' "$path"; then
-    check_fail "$path" "contains unresolved template placeholders"
+    check_fail "$path" "содержит незаполненные плейсхолдеры"
   else
     check_ok "$path"
   fi
 }
 
 check_global() {
-  log "Checking global runtime files under $GLOBAL_MEMORY_DIR"
+  log "Проверка глобальных файлов: $GLOBAL_MEMORY_DIR"
   require_file "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
   require_file "$GLOBAL_MEMORY_DIR/memory-architecture.md"
   require_file "$HOME_DIR/AGENTS.md"
@@ -136,10 +136,10 @@ check_global() {
   if [ "$STRICT" -eq 1 ]; then
     require_contains "$HOME_DIR/AGENTS.md" \
       "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" \
-      "missing global collaboration rules reference"
+      "нет ссылки на глобальные правила сотрудничества"
     require_contains "$HOME_DIR/AGENTS.md" \
       "$GLOBAL_MEMORY_DIR/memory-architecture.md" \
-      "missing global memory architecture reference"
+      "нет ссылки на глобальную архитектуру памяти"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/memory-architecture.md"
     require_no_placeholders "$HOME_DIR/AGENTS.md"
@@ -147,7 +147,7 @@ check_global() {
 }
 
 check_project() {
-  log "Checking project runtime files under $REPO_ROOT"
+  log "Проверка проектных файлов: $REPO_ROOT"
   require_file "$REPO_ROOT/AGENTS.md"
   require_file "$REPO_ROOT/START-HERE.md"
   require_file "$REPO_ROOT/assistant-memory.md"
@@ -158,16 +158,16 @@ check_project() {
   if [ "$STRICT" -eq 1 ]; then
     require_contains "$REPO_ROOT/AGENTS.md" \
       "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" \
-      "missing global collaboration rules reference"
+      "нет ссылки на глобальные правила сотрудничества"
     require_contains "$REPO_ROOT/AGENTS.md" \
       "$REPO_ROOT/memory/current-work-queue.md" \
-      "missing current work queue reference"
+      "нет ссылки на текущую очередь работы"
     require_contains "$REPO_ROOT/START-HERE.md" \
       "$REPO_ROOT/assistant-memory.md" \
-      "missing assistant-memory reference"
+      "нет ссылки на assistant-memory.md"
     require_contains "$REPO_ROOT/assistant-memory.md" \
       "$GLOBAL_MEMORY_DIR/memory-architecture.md" \
-      "missing global memory architecture reference"
+      "нет ссылки на глобальную архитектуру памяти"
     require_no_placeholders "$REPO_ROOT/AGENTS.md"
     require_no_placeholders "$REPO_ROOT/START-HERE.md"
     require_no_placeholders "$REPO_ROOT/assistant-memory.md"

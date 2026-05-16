@@ -1,42 +1,40 @@
-# START HERE
+# START-HERE
 
-This file is the canonical bootstrap point for resuming work on this project in a new session.
-It is an index, not a source of truth for project rules or architecture decisions.
+Этот файл является стартовой точкой для возобновления работы над проектом в новой сессии.
+Это индекс, а не канонический источник проектных правил или архитектурных решений.
 
-## Read These Files First
+## Сначала Прочитать
 
-If a new session starts in this project, read these files before continuing work:
+Если новая сессия начинается в этом проекте, прочитай эти файлы перед продолжением работы:
 
 - `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
 - `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
 - `{{REPO_ROOT}}/AGENTS.md`
 - `{{REPO_ROOT}}/assistant-memory.md`
-- `{{REPO_ROOT}}/technical-specification-mvp.md` if it exists
-- `{{REPO_ROOT}}/memory/current-work-queue.md` if it exists
+- `{{REPO_ROOT}}/technical-specification-mvp.md`, если файл существует
+- `{{REPO_ROOT}}/memory/current-work-queue.md`, если файл существует
 - `{{REPO_ROOT}}/START-HERE.md`
-- `{{REPO_ROOT}}/memory/YYYY-MM-DD.md` for today if it exists, then the latest recent daily file if needed
+- `{{REPO_ROOT}}/memory/YYYY-MM-DD.md` за сегодня, если файл существует; затем последнюю недавнюю ежедневную заметку при необходимости
 
-## Resume Instruction
+## Как Возобновлять Работу
 
-When resuming:
+1. Прочитай перечисленные выше файлы по порядку.
+2. Считай `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md` каноническим источником межпроектных правил сотрудничества.
+3. Считай `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md` каноническим источником общей архитектуры слоев памяти.
+4. Считай `{{REPO_ROOT}}/AGENTS.md` проектным файлом старта и протокола памяти.
+5. Считай `{{REPO_ROOT}}/assistant-memory.md` каноническим источником архитектурных решений проекта.
+6. Считай `{{REPO_ROOT}}/technical-specification-mvp.md` каноническим источником требований к продукту и реализации, когда файл существует.
+7. Считай `{{REPO_ROOT}}/memory/current-work-queue.md` текущей декомпозированной очередью реализации, когда файл существует.
+8. Используй ежедневные файлы в `{{REPO_ROOT}}/memory/` для свежего хронологического контекста и переходи по ссылкам из них в тематические файлы при необходимости.
 
-1. Read the files listed above in order.
-2. Treat `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md` as the source of truth for cross-project collaboration rules.
-3. Treat `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md` as the source of truth for the shared memory layering used across projects.
-4. Treat `{{REPO_ROOT}}/AGENTS.md` as the repo-local startup and memory-protocol file.
-5. Treat `{{REPO_ROOT}}/assistant-memory.md` as the source of truth for project architecture decisions.
-6. Treat `{{REPO_ROOT}}/technical-specification-mvp.md` as the source of truth for product and implementation requirements when it exists.
-7. Treat `{{REPO_ROOT}}/memory/current-work-queue.md` as the current decomposed implementation queue when it exists.
-8. Use daily files in `{{REPO_ROOT}}/memory/` for recent chronological context and follow links from them into topic files when needed.
+## Напоминание В Конце Обсуждения
 
-## End-Of-Discussion Reminder
+1. Обнови релевантные канонические файлы, если изменились текущее состояние, долговременные решения или рекомендуемый следующий шаг.
+2. Следуй устойчивым проектным соглашениям из `{{REPO_ROOT}}/assistant-memory.md`.
+3. Проверь, нужно ли добавить новый материал в `{{REPO_ROOT}}/article-notes.md`, если этот файл существует.
 
-1. Update the relevant source-of-truth files if the current state, durable decisions, or recommended next step changed.
-2. Follow the durable project process agreements from `{{REPO_ROOT}}/assistant-memory.md`.
-3. Check whether any new material should be added to `{{REPO_ROOT}}/article-notes.md` when that file exists.
+## Рекомендуемый Следующий Шаг
 
-## Recommended Next Step
-
-- Do not keep the live step-by-step queue in this file.
-- Use `{{REPO_ROOT}}/memory/current-work-queue.md` for the current decomposed implementation plan and preferred next steps.
-- Keep this file as a bootstrap index only.
+- Не держи живую пошаговую очередь в этом файле.
+- Используй `{{REPO_ROOT}}/memory/current-work-queue.md` для текущего декомпозированного плана реализации и рекомендуемых следующих шагов.
+- Оставляй этот файл только стартовым индексом.

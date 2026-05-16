@@ -1,27 +1,27 @@
-# Current Work Queue
+# Текущая Очередь Работы
 
-This file is the current decomposed task queue for active implementation work.
-Keep it short and update it when the practical next steps materially change.
+Этот файл хранит текущую декомпозированную очередь задач для активной реализации.
+Держи его коротким и обновляй, когда практические следующие шаги существенно меняются.
 
-## Current Status
+## Текущее Состояние
 
-- Last completed step: <describe the latest completed step>
-- Current codebase state: <briefly summarize where the implementation stands>
-- Current known weak area: <state the main current gap>
+- Последний завершенный шаг: <опиши последний завершенный шаг>
+- Текущее состояние кодовой базы: <кратко опиши, где сейчас находится реализация>
+- Текущая слабая зона: <укажи главный текущий пробел>
 
-## Next Step
+## Следующий Шаг
 
-1. <next step 1>
-2. <next step 2>
-3. <next step 3>
+1. <следующий шаг 1>
+2. <следующий шаг 2>
+3. <следующий шаг 3>
 
-## After That
+## Затем
 
-1. <later step 1>
-2. <later step 2>
-3. <later step 3>
+1. <поздний шаг 1>
+2. <поздний шаг 2>
+3. <поздний шаг 3>
 
-## Parking Lot
+## Отложенное
 
-- <parked idea 1>
-- <parked idea 2>
+- <отложенная идея 1>
+- <отложенная идея 2>

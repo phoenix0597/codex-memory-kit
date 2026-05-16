@@ -1,22 +1,20 @@
 # Codex Memory Kit
 
-Portable bootstrap kit for reproducing the Codex memory structure on any machine while preserving the expected runtime paths.
+Переносимый набор для воспроизведения структуры агентной памяти Codex на разных машинах без привязки к конкретному имени пользователя или домашнему каталогу.
 
-Russian version: [README.ru.md](README.ru.md)
+## Назначение
 
-## Purpose
+Набор устанавливает и проверяет трехслойную архитектуру памяти Codex:
 
-This kit installs and verifies a three-layer Codex memory architecture:
+1. Глобальная память в `~/.codex/memories/`
+2. Домашний стартовый файл в `~/AGENTS.md`
+3. Проектная память в `<repo>/AGENTS.md`, `<repo>/START-HERE.md`, `<repo>/assistant-memory.md` и `<repo>/memory/`
 
-1. Global memory in `~/.codex/memories/`
-2. Home bootstrap in `~/AGENTS.md`
-3. Project-local memory in `<repo>/AGENTS.md`, `<repo>/START-HERE.md`, `<repo>/assistant-memory.md`, and `<repo>/memory/`
+Идея простая: исходные шаблоны остаются переносимыми, а абсолютные пути подставляются только во время установки на конкретной машине.
 
-The kit is intended to make the memory setup reproducible across machines without hard-coding one specific username or home directory in the source templates.
+## Рабочая Структура
 
-## Runtime Layout
-
-After installation, the expected runtime paths are:
+После установки ожидаются такие файлы:
 
 - `~/.codex/memories/global-collaboration-rules.md`
 - `~/.codex/memories/memory-architecture.md`
@@ -28,38 +26,40 @@ After installation, the expected runtime paths are:
 - `<repo>/memory/_templates/daily.md`
 - `<repo>/memory/_templates/topic.md`
 
-## Source Layout
+На Windows эти же роли сохраняются, но пути выглядят как `$HOME\.codex\memories\...` и `C:\path\to\repo\...`.
 
-- `templates/home/` - home-level bootstrap templates
-- `templates/global/` - global memory templates
-- `templates/project/` - project-local memory templates
-- `scripts/install.sh` - installs global memory and home bootstrap
-- `scripts/init-project.sh` - initializes project-local memory in a repo
-- `scripts/check.sh` - verifies that the runtime structure is valid
-- `scripts/export-memory.sh` - exports the installed memory structure from a machine
-- `scripts/import-memory.sh` - imports an exported memory structure onto a machine
+## Структура Исходников
 
-## Design Principles
+- `templates/home/` - шаблоны домашнего уровня
+- `templates/global/` - шаблоны глобальной памяти
+- `templates/project/` - шаблоны проектной памяти
+- `scripts/install.sh` - установка глобальной памяти и `~/AGENTS.md` для Linux, macOS и WSL
+- `scripts/init-project.sh` - инициализация проектной памяти для Linux, macOS и WSL
+- `scripts/check.sh` - проверка установленной структуры для Linux, macOS и WSL
+- `scripts/export-memory.sh` - экспорт установленной памяти для Linux, macOS и WSL
+- `scripts/import-memory.sh` - импорт ранее экспортированной памяти для Linux, macOS и WSL
+- `scripts/memory-kit.ps1` - единый PowerShell-скрипт для Windows
 
-- Runtime paths stay stable.
-- Source templates stay machine-agnostic.
-- Absolute paths are rendered only at install time.
-- Installation should be idempotent.
-- Verification should fail loudly on broken startup chains or missing required files.
+## Принципы
 
-## Platform Support
+- Рабочие пути должны оставаться стабильными.
+- Исходные шаблоны не должны зависеть от конкретной машины.
+- Абсолютные пути появляются только при рендере шаблонов.
+- Повторный запуск установки должен быть безопасным.
+- Проверка должна явно сообщать о пропавших файлах, незаполненных плейсхолдерах и сломанных ссылках стартовой цепочки.
 
-Current intended support:
+## Поддерживаемые Платформы
 
-- Linux
-- macOS
-- Windows via WSL
+Поддерживаются два способа работы:
 
-Native Windows shell environments are currently out of scope. The kit relies on POSIX-style shell scripts and Unix-like path semantics.
+- Linux, macOS и Windows через WSL: POSIX-скрипты из `scripts/*.sh`
+- Нативная Windows-среда: PowerShell-скрипт `scripts/memory-kit.ps1`
 
-## Template Variables
+Для Windows нужен Windows PowerShell 5.1 или PowerShell 7+.
 
-Templates may use the following placeholders:
+## Переменные Шаблонов
+
+Шаблоны могут использовать только эти плейсхолдеры:
 
 - `{{HOME_DIR}}`
 - `{{CODEX_DIR}}`
@@ -67,197 +67,214 @@ Templates may use the following placeholders:
 - `{{REPO_ROOT}}`
 - `{{PROJECT_NAME}}`
 
-## Default Path Resolution
+Остальные плейсхолдеры считаются ошибкой рендера.
 
-Unless overridden explicitly by script arguments:
+## Пути По Умолчанию
 
-- `CODEX_DIR` defaults to `{{HOME_DIR}}/.codex`
-- `GLOBAL_MEMORY_DIR` defaults to `{{CODEX_DIR}}/memories`
+Если значения не переопределены аргументами:
 
-In the usual case, the effective global memory path is:
+- `CODEX_DIR` = `{{HOME_DIR}}/.codex` в POSIX-среде или `{{HOME_DIR}}\.codex` в PowerShell
+- `GLOBAL_MEMORY_DIR` = `{{CODEX_DIR}}/memories` в POSIX-среде или `{{CODEX_DIR}}\memories` в PowerShell
 
-- `~/.codex/memories`
+Обычный итоговый путь глобальной памяти:
 
-## Bootstrap On A New Machine
+- POSIX/WSL: `~/.codex/memories`
+- Windows: `$HOME\.codex\memories`
 
-Clone the repository first. The scripts live inside this repo, so there is nothing to run until the kit has been cloned to a local path.
+## Клонирование
 
-Recommended clone path:
+Сначала нужно склонировать этот репозиторий. Скрипты лежат внутри него, поэтому до клонирования запускать нечего.
+
+Рекомендуемый путь в POSIX/WSL:
 
 ```bash
 git clone git@github.com:phoenix0597/codex-memory-kit.git ~/.codex/codex-memory-kit
 cd ~/.codex/codex-memory-kit
 ```
 
-This location is recommended because it keeps the source/tooling repo next to the live Codex runtime directory without mixing it into `~/.codex/memories/`.
+Рекомендуемый путь в PowerShell:
 
-## Where To Clone
-
-You do not have to clone the repo specifically into `~/.codex/codex-memory-kit`.
-
-The scripts render runtime files from the values passed via `--home`, `--repo`, and related arguments, not from the clone location itself. So this also works:
-
-```bash
-git clone git@github.com:phoenix0597/codex-memory-kit.git /some/other/path/codex-memory-kit
-cd /some/other/path/codex-memory-kit
+```powershell
+git clone git@github.com:phoenix0597/codex-memory-kit.git "$HOME\.codex\codex-memory-kit"
+Set-Location "$HOME\.codex\codex-memory-kit"
 ```
 
-As long as you either:
+Клонировать именно в `.codex/codex-memory-kit` не обязательно. Рабочие файлы создаются по значениям `--home`, `--repo`, `-Home`, `-Repo` и связанным аргументам, а не по месту, где лежит сам набор.
 
-- run the scripts from inside the cloned repo; or
-- pass `--source-root /absolute/path/to/codex-memory-kit`
+## Установка В Linux, macOS И WSL
 
-the rendered runtime paths will still be correct.
-
-In short:
-
-- clone location = where the source/tooling repo lives
-- `--home` and `--repo` = where runtime files are created
-
-## Installation
-
-Install the global layer and home bootstrap:
+Установить глобальный слой и домашний `AGENTS.md`:
 
 ```bash
 ./scripts/install.sh --home "$HOME"
 ```
 
-Initialize a repository with project-local memory:
+Инициализировать проектную память:
 
 ```bash
 ./scripts/init-project.sh --repo /path/to/repo --project-name my-project
 ```
 
-Verify the resulting structure:
+Проверить результат:
 
 ```bash
-./scripts/check.sh --home "$HOME" --repo /path/to/repo
+./scripts/check.sh --home "$HOME" --repo /path/to/repo --strict
 ```
 
-## Modes
+## Установка В Windows
 
-`install.sh` supports:
+Установить глобальный слой и домашний `AGENTS.md`:
 
-- normal install
-- dry-run
-- force overwrite when explicitly requested
+```powershell
+.\scripts\memory-kit.ps1 install -Home $HOME
+```
 
-`check.sh` supports:
+Инициализировать проектную память:
 
-- global-only checks
-- project-only checks
-- combined checks
+```powershell
+.\scripts\memory-kit.ps1 init-project -Repo C:\path\to\repo -ProjectName my-project
+```
 
-## Safety Rules
+Проверить результат:
 
-- Do not overwrite existing files unless `--force` is passed.
-- Do not create project-local files outside the target repo.
-- Do not silently skip required files.
-- Do not rewrite user-authored memory files during verification.
+```powershell
+.\scripts\memory-kit.ps1 check -Home $HOME -Repo C:\path\to\repo -Strict
+```
 
-## Expected Workflow
+Скрипт также поддерживает `-Force`, `-DryRun`, `-SourceRoot`, `-CodexDir`, `-GlobalMemoryDir` и `-VerboseLog` там, где эти параметры применимы.
 
-1. Clone this repository to a local source path.
-2. Install global memory and home bootstrap once per machine.
-3. Initialize project-local memory once per repository.
-4. Run checks after installation or after template changes.
-5. Keep accumulated daily/topic notes under normal project version control, not inside the kit.
+## Экспорт И Импорт
 
-## Non-Goals
+POSIX/WSL:
 
-- This kit is not a backup system by itself.
-- This kit does not sync live memory files across machines.
-- This kit does not replace project git history.
+```bash
+./scripts/export-memory.sh --home "$HOME" --repo /path/to/repo --output-dir /path/to/export
+./scripts/import-memory.sh --input-dir /path/to/export --home "$HOME" --repo /path/to/repo
+```
 
-## Implementation Notes
+PowerShell:
 
-### Template Rendering
+```powershell
+.\scripts\memory-kit.ps1 export -Home $HOME -Repo C:\path\to\repo -OutputDir C:\path\to\export
+.\scripts\memory-kit.ps1 import -InputDir C:\path\to\export -Home $HOME -Repo C:\path\to\repo
+```
 
-- Templates should remain machine-agnostic in source form.
-- Runtime files may contain absolute paths, but only after rendering on the target machine.
-- Placeholder replacement should be explicit and limited to the documented variables:
-  - `{{HOME_DIR}}`
-  - `{{CODEX_DIR}}`
-  - `{{GLOBAL_MEMORY_DIR}}`
-  - `{{REPO_ROOT}}`
-  - `{{PROJECT_NAME}}`
-- Rendering should fail if a template contains an unknown placeholder or if a required variable is missing.
-- Rendering should not try to be a generic templating engine; simple deterministic placeholder substitution is preferred.
+## Режимы
 
-### Path Rules
+`install.sh` и команда `install` в `memory-kit.ps1` поддерживают:
 
-- The runtime path contract is part of the architecture and should stay stable.
-- `install.sh` is responsible only for home/global runtime paths.
-- `init-project.sh` is responsible only for repo-local runtime paths.
-- `check.sh` should validate the runtime structure, not the source template tree.
-- The clone location of the kit repo is independent from the runtime target paths.
-- No script should assume a fixed username such as `phoenix`; all rendered absolute paths must derive from the provided `--home` or `--repo`.
+- обычную установку
+- пробный запуск через `--dry-run` или `-DryRun`
+- перезапись через явный `--force` или `-Force`
+- пропуск домашнего `AGENTS.md` через `--no-home-agents` или `-NoHomeAgents`
 
-### Idempotency
+`check.sh` и команда `check` в `memory-kit.ps1` поддерживают:
 
-- Re-running `install.sh` with the same arguments should produce the same runtime layout without duplicating content.
-- Re-running `check.sh` should never modify files.
-- Re-running `init-project.sh` without `--force` should skip existing target files and report them explicitly.
-- Scripts should be safe to run multiple times during machine setup, migration, or repair.
+- проверку только глобального слоя: `--mode global` или `-Mode global`
+- проверку только проекта: `--mode project` или `-Mode project`
+- общую проверку: `--mode all` или `-Mode all`
+- строгую проверку ссылок и плейсхолдеров через `--strict` или `-Strict`
 
-### Overwrite Policy
+## Правила Безопасности
 
-- Existing files must not be overwritten by default.
-- Overwrite should require an explicit `--force`.
-- `--force` should apply only to files managed by the kit, not to arbitrary extra files in the same directories.
-- If a target file exists and differs, the script should report one of:
-  - `UNCHANGED`
-  - `SKIP`
-  - `OVERWRITE`
-- `check.sh` must never rewrite files, even in strict mode.
+- Не перезаписывать существующие файлы без `--force` или `-Force`.
+- Не создавать проектные файлы вне указанного репозитория.
+- Не пропускать обязательные файлы молча.
+- Не переписывать пользовательские файлы памяти во время проверки.
+- Не удалять файлы, которыми набор не управляет.
 
-### File Ownership Boundaries
+## Ожидаемый Процесс
 
-- The kit owns only bootstrap and scaffolded files derived from its templates.
-- Daily notes, topic files, article notes, and project-specific working content remain user/project-owned after creation.
-- Verification may check for their presence when required by the architecture, but should not normalize or rewrite their contents.
-- The kit should not delete files that it did not create.
+1. Склонировать этот репозиторий в локальный каталог.
+2. Один раз на машине установить глобальную память и домашний `AGENTS.md`.
+3. Один раз в каждом репозитории инициализировать проектную память.
+4. Запустить проверку после установки или после изменения шаблонов.
+5. Хранить накопленные ежедневные и тематические заметки в обычной истории проекта, а не внутри этого набора.
 
-### Validation Rules
+## Что Набор Не Делает
 
-- `check.sh` should validate both file existence and architecture coherence.
-- In normal mode, validation should focus on required files and readable startup references.
-- In `--strict` mode, validation should also detect:
-  - broken startup-order references
-  - missing linked files explicitly named in bootstrap files
-  - placeholder text left unresolved in runtime files
-  - obvious path mismatches between rendered files and the current machine layout
-- Validation output should identify the failing file and the exact rule that failed.
+- Не является системой резервного копирования сам по себе.
+- Не синхронизирует живые файлы памяти между машинами.
+- Не заменяет историю проекта в git.
 
-### Logging and Output
+## Технические Правила
 
-- Scripts should print concise, deterministic status lines.
-- Prefer action-oriented output such as:
+### Рендер Шаблонов
+
+- Шаблоны в исходниках должны оставаться независимыми от машины.
+- Рабочие файлы могут содержать абсолютные пути только после рендера.
+- Подстановка должна быть явной и ограниченной документированными плейсхолдерами.
+- Рендер должен падать, если в шаблоне остался неизвестный плейсхолдер или не задана обязательная переменная.
+- Это не универсальный шаблонизатор; предпочтительна простая и предсказуемая подстановка строк.
+
+### Правила Путей
+
+- Контракт рабочих путей является частью архитектуры и должен оставаться стабильным.
+- `install.sh` и команда `install` отвечают только за домашний и глобальный слои.
+- `init-project.sh` и команда `init-project` отвечают только за проектные файлы.
+- `check.sh` и команда `check` проверяют рабочую структуру, а не дерево исходных шаблонов.
+- Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`.
+
+### Повторный Запуск
+
+- Повторная установка с теми же аргументами не должна дублировать содержимое.
+- Проверка никогда не должна менять файлы.
+- Повторная инициализация проекта без `--force` или `-Force` должна явно пропускать существующие файлы.
+- Скрипты должны быть безопасны для повторного запуска во время настройки, переноса или ремонта окружения.
+
+### Перезапись
+
+- Существующие файлы не перезаписываются по умолчанию.
+- Перезапись требует явного `--force` или `-Force`.
+- Перезапись относится только к файлам, которыми управляет набор.
+- Статусные токены вывода остаются машинно-читаемыми: `CREATE`, `SKIP`, `OVERWRITE`, `EXPORT`, `IMPORT`, `CHECK OK`, `CHECK FAIL`.
+
+### Границы Владения
+
+- Набор владеет только стартовыми и каркасными файлами, созданными из его шаблонов.
+- Ежедневные заметки, тематические файлы, заметки по статьям и рабочий контекст проекта после создания принадлежат пользователю или проекту.
+- Проверка может требовать наличие файлов, но не должна нормализовать или переписывать их содержимое.
+
+### Проверка
+
+- В обычном режиме проверяются обязательные файлы.
+- В `--strict` или `-Strict` дополнительно проверяются:
+  - ссылки стартовой цепочки
+  - явно указанные связанные файлы
+  - незаполненные плейсхолдеры
+  - очевидные несовпадения между отрендеренными путями и текущей машиной
+- Сообщение об ошибке должно указывать файл и правило, которое не прошло.
+
+### Вывод
+
+- Скрипты печатают короткие детерминированные строки.
+- Предпочтительный словарь статусов:
   - `CREATE <path>`
   - `SKIP <path>`
   - `OVERWRITE <path>`
+  - `EXPORT <path>`
+  - `IMPORT <path>`
   - `CHECK OK <path>`
   - `CHECK FAIL <path>: <reason>`
-- `--verbose` may print additional reasoning, but default output should stay short and scannable.
-- `--dry-run` should print planned actions using the same status vocabulary, prefixed clearly as simulation.
+- Пробный запуск помечает действия как `DRY-RUN`.
 
-### Failure Behavior
+### Ошибки
 
-- Scripts should fail fast on invalid arguments.
-- Scripts should fail before partial writes when a required source template is missing.
-- If a multi-file install stops mid-run, the output should make it obvious which files were already written.
-- `check.sh` should return non-zero on any failed required check.
+- Скрипты должны быстро падать на неверных аргументах.
+- Если отсутствует обязательный исходный шаблон, скрипт должен остановиться до записи зависящих от него файлов.
+- Если установка оборвалась на середине, вывод должен показывать, какие файлы уже были созданы.
+- Проверка возвращает ненулевой код при любой обязательной ошибке.
 
-### Portability Constraints
+### Переносимость
 
-- Prefer POSIX shell behavior where practical.
-- Avoid dependencies on Python, GNU-only tools, or external templating engines unless they are made an explicit prerequisite.
-- If non-POSIX behavior is required, document it clearly in the prerequisites section.
-- Home-relative semantics should be preserved even when the absolute home path changes across machines.
+- Для Linux, macOS и WSL используется POSIX-поведение там, где это практично.
+- Для нативной Windows используется PowerShell без зависимости от `bash`, `sed`, `grep` или `cp`.
+- Если появляется новая внешняя зависимость, она должна быть явно описана в этом файле.
+- Логика домашних путей должна сохраняться даже при переносе между машинами с разными абсолютными путями.
 
-### Upgrade Policy
+### Обновления
 
-- Template changes should be forward-applicable through re-running the installer with `--force`.
-- The kit should not silently migrate user-authored project memory content.
-- If a template contract changes incompatibly, the README should describe the migration path explicitly.
-- `check.sh --strict` should help detect stale runtime files after a kit upgrade.
+- Изменения шаблонов должны применяться повторным запуском установщика с `--force` или `-Force`.
+- Набор не должен молча мигрировать пользовательское содержимое проектной памяти.
+- Если контракт шаблонов меняется несовместимо, путь миграции должен быть описан в README.
+- Строгая проверка должна помогать находить устаревшие рабочие файлы после обновления набора.

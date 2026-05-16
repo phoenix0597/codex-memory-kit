@@ -1,5 +1,5 @@
 ---
-title: <Title>
+title: <Название>
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 status: active
@@ -8,25 +8,25 @@ related:
   - memory/YYYY-MM-DD.md
 ---
 
-# <Title>
+# <Название>
 
-## Summary
-Short summary in 2-5 lines.
+## Резюме
+Краткое резюме в 2-5 строк.
 
-## Context
-Why this topic came up.
+## Контекст
+Почему эта тема появилась.
 
-## Decisions
-- Decision 1
-- Decision 2
+## Решения
+- Решение 1
+- Решение 2
 
-## Rationale
-Why this approach was chosen.
+## Обоснование
+Почему выбран этот подход.
 
-## Open Questions
-- Question 1
-- Question 2
+## Открытые Вопросы
+- Вопрос 1
+- Вопрос 2
 
-## Related
+## Связанные Файлы
 - `memory/YYYY-MM-DD.md`
 - `assistant-memory.md`

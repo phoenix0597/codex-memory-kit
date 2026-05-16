@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Usage: install.sh --home <path> [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose] [--no-home-agents]
+Использование: install.sh --home <path> [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose] [--no-home-agents]
 EOF
 }
 
@@ -92,7 +92,7 @@ render_template() {
   local home_esc codex_esc global_esc
 
   if [ ! -f "$src" ]; then
-    printf 'Missing template: %s\n' "$src" >&2
+    printf 'Отсутствует шаблон: %s\n' "$src" >&2
     exit 1
   fi
 
@@ -113,7 +113,7 @@ render_template() {
     "$src")
 
   if printf '%s' "$rendered" | grep -Eq '{{[A-Z_][A-Z0-9_]*}}'; then
-    printf 'Unresolved placeholder(s) after rendering %s\n' "$src" >&2
+    printf 'После рендера остались незаполненные плейсхолдеры: %s\n' "$src" >&2
     exit 1
   fi
 
@@ -136,8 +136,8 @@ render_template() {
   fi
 }
 
-log "Using source root: $SOURCE_ROOT"
-log "Installing global memory to: $GLOBAL_MEMORY_DIR"
+log "Корень исходного набора: $SOURCE_ROOT"
+log "Глобальная память: $GLOBAL_MEMORY_DIR"
 
 if [ "$DRY_RUN" -eq 0 ]; then
   mkdir -p "$GLOBAL_MEMORY_DIR"

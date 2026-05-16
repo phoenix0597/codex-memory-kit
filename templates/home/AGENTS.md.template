@@ -1,34 +1,34 @@
 # AGENTS.md
 
-Global instructions for work inside `{{HOME_DIR}}`.
+Глобальные инструкции для работы внутри `{{HOME_DIR}}`.
 
-## Session Startup
+## Старт Сессии
 
-At the start of a session, read:
+В начале сессии прочитай:
 
 1. `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
 2. `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
 
-If you are working inside a repository or project directory:
+Если работа идет внутри репозитория или проектного каталога:
 
-3. Read the nearest repo-local `AGENTS.md` if it exists.
-4. Read the repo-local `START-HERE.md` if it exists.
+3. Прочитай ближайший проектный `AGENTS.md`, если он есть.
+4. Прочитай проектный `START-HERE.md`, если он есть.
 
-## Scope
+## Область Действия
 
-This file is the global layer for work under `{{HOME_DIR}}`.
+Этот файл задает глобальный слой для работы под `{{HOME_DIR}}`.
 
-- Keep this file short and cross-project only.
-- Do not store project-specific architecture or implementation history here.
-- Repo-local `AGENTS.md` files are allowed to add project-specific startup order, memory rules, and conventions.
+- Держи этот файл коротким и применимым ко всем проектам.
+- Не храни здесь проектную архитектуру или историю реализации.
+- Проектные `AGENTS.md` могут добавлять локальный порядок старта, правила памяти и соглашения.
 
-## Memory
+## Память
 
-- Cross-project durable rules live in `{{GLOBAL_MEMORY_DIR}}/`.
-- Project-specific durable rules should live in the project's `assistant-memory.md`.
-- Project chronological and thematic notes should live in the project's `memory/` directory.
-- Prefer links between these layers instead of duplicating large text blocks.
+- Долговременные правила для всех проектов хранятся в `{{GLOBAL_MEMORY_DIR}}/`.
+- Долговременные правила конкретного проекта должны храниться в проектном `assistant-memory.md`.
+- Хронологические и тематические заметки проекта должны храниться в проектном каталоге `memory/`.
+- Предпочитай ссылки между слоями вместо копирования больших фрагментов текста.
 
-## New Projects
+## Новые Проекты
 
-Use the memory kit's `init-project.sh` to bootstrap repo-local memory in a new repository.
+Для создания проектной памяти в новом репозитории используй скрипт набора: `init-project.sh` в POSIX/WSL или команду `init-project` в `memory-kit.ps1` на Windows.

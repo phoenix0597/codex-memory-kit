@@ -1,53 +1,53 @@
 # AGENTS.md
 
-Repo-local instructions for agent sessions in this project.
+Локальные инструкции для агентных сессий в этом проекте.
 
-## Session Startup
+## Старт Сессии
 
-At the start of a new session, read these files in order:
+В начале новой сессии прочитай эти файлы по порядку:
 
 1. `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
 2. `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
 3. `{{REPO_ROOT}}/AGENTS.md`
 4. `{{REPO_ROOT}}/START-HERE.md`
 5. `{{REPO_ROOT}}/assistant-memory.md`
-6. `{{REPO_ROOT}}/technical-specification-mvp.md` if it exists
-7. `{{REPO_ROOT}}/memory/current-work-queue.md` if it exists
-8. `memory/YYYY-MM-DD.md` for today if it exists, then the latest recent daily file if needed
-9. Any topic files linked from the relevant daily file
+6. `{{REPO_ROOT}}/technical-specification-mvp.md`, если файл существует
+7. `{{REPO_ROOT}}/memory/current-work-queue.md`, если файл существует
+8. `memory/YYYY-MM-DD.md` за сегодня, если файл существует; затем последнюю недавнюю ежедневную заметку при необходимости
+9. Тематические файлы, на которые ссылается релевантная ежедневная заметка
 
-## Canonical File Roles
+## Роли Канонических Файлов
 
-- `technical-specification-mvp.md` - source of truth for product and implementation requirements when present
-- `assistant-memory.md` - source of truth for durable project architecture decisions and process agreements
-- `START-HERE.md` - bootstrap index and resume order, not a source of truth for project requirements or architecture
-- `memory/current-work-queue.md` - current decomposed implementation queue and preferred next steps; working context, not a durable source of truth
-- `memory/YYYY-MM-DD.md` - short chronological working notes, not a durable source of truth
-- `memory/topic-<slug>.md` - longer thematic notes and rationale; useful recurring context, but not a replacement for the canonical durable files above
+- `technical-specification-mvp.md` - канонический источник требований к продукту и реализации, если файл существует
+- `assistant-memory.md` - канонический источник долговременных архитектурных решений и рабочих соглашений проекта
+- `START-HERE.md` - стартовый индекс и порядок возобновления работы, не источник требований или архитектуры
+- `memory/current-work-queue.md` - текущая декомпозированная очередь реализации и рекомендуемые следующие шаги; рабочий контекст, не долговременный источник истины
+- `memory/YYYY-MM-DD.md` - короткие хронологические рабочие заметки, не долговременный источник истины
+- `memory/topic-<slug>.md` - более длинные тематические заметки и обоснования; полезный повторяющийся контекст, но не замена каноническим файлам выше
 
-## Project Memory Convention
+## Соглашение О Проектной Памяти
 
-Use a lightweight three-layer working-memory model:
+Используй легкую трехслойную модель рабочей памяти:
 
-1. Daily files in `memory/YYYY-MM-DD.md`
-2. Topic files in `memory/topic-<slug>.md`
-3. Durable distilled memory in `assistant-memory.md`
+1. Ежедневные файлы в `memory/YYYY-MM-DD.md`
+2. Тематические файлы в `memory/topic-<slug>.md`
+3. Сжатая долговременная память в `assistant-memory.md`
 
-This repo-local scheme is the project-level implementation of the shared cross-project memory convention from `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
+Эта проектная схема является локальной реализацией общей межпроектной архитектуры из `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
 
-Rules:
+Правила:
 
-- Write new discussion summaries to the current daily file first.
-- Create or update a topic file when a theme is likely to return, needs rationale, or grows beyond a short daily note.
-- Keep daily files short; store the summary there and link to the topic file when one exists.
-- Prefer links and short pointers between memory layers instead of copying the same rule or decision into multiple files.
-- Do not duplicate large text blocks across daily files, topic files, `assistant-memory.md`, and the technical specification.
-- Keep `assistant-memory.md` focused on durable project rules and architecture, not temporary discussion logs.
+- Новые резюме обсуждений сначала записывай в текущий ежедневный файл.
+- Создавай или обновляй тематический файл, когда тема, вероятно, вернется, требует обоснования или стала слишком большой для короткой ежедневной заметки.
+- Держи ежедневные файлы короткими; храни там резюме и ссылку на тематический файл, если он есть.
+- Предпочитай ссылки и короткие указатели между слоями памяти вместо копирования одного и того же правила или решения в несколько файлов.
+- Не дублируй большие фрагменты текста между ежедневными файлами, тематическими файлами, `assistant-memory.md` и технической спецификацией.
+- Держи `assistant-memory.md` сфокусированным на долговременных правилах и архитектуре проекта, а не на временных логах обсуждений.
 
-## End Of Discussion
+## Завершение Обсуждения
 
-Before closing a substantial discussion or implementation step:
+Перед закрытием существенного обсуждения или шага реализации:
 
-1. Update the relevant source-of-truth file if a durable rule or decision changed.
-2. Update today's daily file if the discussion created useful future context.
-3. Update or create a topic file if the discussion is likely to recur.
+1. Обнови релевантный канонический файл, если изменилось долговременное правило или решение.
+2. Обнови сегодняшнюю ежедневную заметку, если обсуждение создало полезный будущий контекст.
+3. Обнови или создай тематический файл, если тема, вероятно, будет возвращаться.

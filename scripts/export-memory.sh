@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Usage: export-memory.sh --home <path> --output-dir <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
+Использование: export-memory.sh --home <path> --output-dir <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
 EOF
 }
 
@@ -70,7 +70,7 @@ copy_file() {
   local src=$1
   local dst=$2
   if [ ! -f "$src" ]; then
-    printf 'Missing source file: %s\n' "$src" >&2
+    printf 'Исходный файл не найден: %s\n' "$src" >&2
     exit 1
   fi
   if [ -e "$dst" ] && [ "$FORCE" -ne 1 ]; then
@@ -86,7 +86,7 @@ copy_tree() {
   local src=$1
   local dst=$2
   if [ ! -d "$src" ]; then
-    printf 'Missing source directory: %s\n' "$src" >&2
+    printf 'Исходный каталог не найден: %s\n' "$src" >&2
     exit 1
   fi
   if [ -e "$dst" ] && [ "$FORCE" -ne 1 ]; then
@@ -99,7 +99,7 @@ copy_tree() {
   printf 'EXPORT %s\n' "$dst"
 }
 
-log "Exporting memory to $OUTPUT_DIR"
+log "Экспорт памяти: $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 copy_file "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" \
