@@ -14,6 +14,12 @@
 3. Прочитай ближайший проектный `AGENTS.md`, если он есть.
 4. Прочитай проектный `START-HERE.md`, если он есть.
 
+## Форматы Путей
+
+- Git Bash/MSYS и POSIX-проверки: `{{GLOBAL_MEMORY_DIR_POSIX}}/global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_POSIX}}/memory-architecture.md`.
+- PowerShell и shell-команды Codex Desktop: `{{GLOBAL_MEMORY_DIR_WINDOWS}}\global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_WINDOWS}}\memory-architecture.md`.
+- Когда открываешь файл из памяти shell-командой, используй формат активной оболочки. Не меняй канонические ссылки только ради другого формата пути, если они нужны проверке memory kit.
+
 ## Область Действия
 
 Этот файл задает глобальный слой для работы под `{{HOME_DIR}}`.

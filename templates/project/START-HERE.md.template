@@ -16,6 +16,12 @@
 - `{{REPO_ROOT}}/START-HERE.md`
 - `{{REPO_ROOT}}/memory/YYYY-MM-DD.md` за сегодня, если файл существует; затем последнюю недавнюю ежедневную заметку при необходимости
 
+## Форматы Путей
+
+- Git Bash/MSYS и POSIX-проверки: `{{REPO_ROOT_POSIX}}/assistant-memory.md`; `{{REPO_ROOT_POSIX}}/memory/current-work-queue.md`.
+- PowerShell и shell-команды Codex Desktop: `{{REPO_ROOT_WINDOWS}}\assistant-memory.md`; `{{REPO_ROOT_WINDOWS}}\memory\current-work-queue.md`.
+- Когда открываешь файл из памяти shell-командой, используй формат активной оболочки. Не меняй канонические ссылки только ради другого формата пути, если они нужны проверке memory kit.
+
 ## Как Возобновлять Работу
 
 1. Прочитай перечисленные выше файлы по порядку.

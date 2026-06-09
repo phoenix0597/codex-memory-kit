@@ -100,13 +100,45 @@ status() {
 }
 
 escape_sed() {
-  printf '%s' "$1" | sed 's/[|&]/\\&/g'
+  printf '%s' "$1" | sed 's/[\\|&]/\\&/g'
+}
+
+to_posix_path() {
+  printf '%s' "$1"
+}
+
+to_windows_path() {
+  local path=$1
+  local drive rest
+
+  case "$path" in
+    /[A-Za-z]/*)
+      drive=$(printf '%s' "${path:1:1}" | tr '[:lower:]' '[:upper:]')
+      rest=${path:2}
+      rest=${rest//\//\\}
+      printf '%s:%s' "$drive" "$rest"
+      ;;
+    /mnt/[A-Za-z]/*)
+      drive=$(printf '%s' "${path:5:1}" | tr '[:lower:]' '[:upper:]')
+      rest=${path:6}
+      rest=${rest//\//\\}
+      printf '%s:%s' "$drive" "$rest"
+      ;;
+    [A-Za-z]:/*)
+      printf '%s' "${path//\//\\}"
+      ;;
+    *)
+      printf '%s' "$path"
+      ;;
+  esac
 }
 
 render_template() {
   local src=$1
   local dst=$2
   local home_esc codex_esc global_esc repo_esc project_esc
+  local home_posix_esc codex_posix_esc global_posix_esc repo_posix_esc
+  local home_windows_esc codex_windows_esc global_windows_esc repo_windows_esc
 
   if [ ! -f "$src" ]; then
     printf 'Отсутствует шаблон: %s\n' "$src" >&2
@@ -123,6 +155,14 @@ render_template() {
   global_esc=$(escape_sed "$GLOBAL_MEMORY_DIR")
   repo_esc=$(escape_sed "$REPO_ROOT")
   project_esc=$(escape_sed "$PROJECT_NAME")
+  home_posix_esc=$(escape_sed "$(to_posix_path "$HOME_DIR")")
+  codex_posix_esc=$(escape_sed "$(to_posix_path "$CODEX_DIR")")
+  global_posix_esc=$(escape_sed "$(to_posix_path "$GLOBAL_MEMORY_DIR")")
+  repo_posix_esc=$(escape_sed "$(to_posix_path "$REPO_ROOT")")
+  home_windows_esc=$(escape_sed "$(to_windows_path "$HOME_DIR")")
+  codex_windows_esc=$(escape_sed "$(to_windows_path "$CODEX_DIR")")
+  global_windows_esc=$(escape_sed "$(to_windows_path "$GLOBAL_MEMORY_DIR")")
+  repo_windows_esc=$(escape_sed "$(to_windows_path "$REPO_ROOT")")
 
   local rendered
   rendered=$(sed \
@@ -131,6 +171,14 @@ render_template() {
     -e "s|{{GLOBAL_MEMORY_DIR}}|$global_esc|g" \
     -e "s|{{REPO_ROOT}}|$repo_esc|g" \
     -e "s|{{PROJECT_NAME}}|$project_esc|g" \
+    -e "s|{{HOME_DIR_POSIX}}|$home_posix_esc|g" \
+    -e "s|{{CODEX_DIR_POSIX}}|$codex_posix_esc|g" \
+    -e "s|{{GLOBAL_MEMORY_DIR_POSIX}}|$global_posix_esc|g" \
+    -e "s|{{REPO_ROOT_POSIX}}|$repo_posix_esc|g" \
+    -e "s|{{HOME_DIR_WINDOWS}}|$home_windows_esc|g" \
+    -e "s|{{CODEX_DIR_WINDOWS}}|$codex_windows_esc|g" \
+    -e "s|{{GLOBAL_MEMORY_DIR_WINDOWS}}|$global_windows_esc|g" \
+    -e "s|{{REPO_ROOT_WINDOWS}}|$repo_windows_esc|g" \
     "$src")
 
   if printf '%s' "$rendered" | grep -Eq '{{[A-Z_][A-Z0-9_]*}}'; then

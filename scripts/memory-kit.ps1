@@ -86,6 +86,25 @@ function Normalize-ResolvedPath {
   return $PathValue.TrimEnd([char[]]@("\", "/"))
 }
 
+function Convert-ToMsysPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$PathValue
+  )
+
+  $normalized = $PathValue.TrimEnd([char[]]@("\", "/"))
+  if ($normalized -match "^([A-Za-z]):[\\/](.*)$") {
+    $drive = $matches[1].ToLowerInvariant()
+    $rest = $matches[2].Replace("\", "/")
+    if ([string]::IsNullOrWhiteSpace($rest)) {
+      return "/$drive"
+    }
+    return "/$drive/$rest"
+  }
+
+  return $normalized.Replace("\", "/")
+}
+
 function Join-KitPath {
   param(
     [Parameter(Mandatory = $true)]
@@ -134,12 +153,21 @@ function Normalize-RenderedWindowsPaths {
     [hashtable]$Variables
   )
 
-  foreach ($value in $Variables.Values) {
+  foreach ($key in $Variables.Keys) {
+    if ($key -like "*_POSIX") {
+      continue
+    }
+
+    $value = $Variables[$key]
     if ([string]::IsNullOrWhiteSpace([string]$value)) {
       continue
     }
 
     $path = [string]$value
+    if ($path.StartsWith("/")) {
+      continue
+    }
+
     $backtick = [char]96
     $pattern = [regex]::Escape($path) + "[^$backtick\s,)]*"
     $Content = [regex]::Replace($Content, $pattern, {
@@ -149,6 +177,20 @@ function Normalize-RenderedWindowsPaths {
   }
 
   return $Content
+}
+
+function Normalize-RenderedPosixPaths {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Content
+  )
+
+  $backtick = [char]96
+  $pattern = "/(?:[A-Za-z]|mnt/[A-Za-z])(?:/|\\)[^$backtick\s,)]*"
+  return [regex]::Replace($Content, $pattern, {
+    param($match)
+    $match.Value.Replace("\", "/")
+  })
 }
 
 function Get-EffectiveHome {
@@ -222,6 +264,7 @@ function Render-Template {
     $content = $content.Replace("{{$name}}", [string]$Variables[$name])
   }
   $content = Normalize-RenderedWindowsPaths -Content $content -Variables $Variables
+  $content = Normalize-RenderedPosixPaths -Content $content
 
   if ($content -match "{{[A-Z_][A-Z0-9_]*}}") {
     throw "После рендера остались незаполненные плейсхолдеры: $Source"
@@ -315,6 +358,12 @@ function Invoke-Install {
     HOME_DIR = $effectiveHome
     CODEX_DIR = $effectiveCodexDir
     GLOBAL_MEMORY_DIR = $effectiveGlobalMemoryDir
+    HOME_DIR_POSIX = Convert-ToMsysPath $effectiveHome
+    CODEX_DIR_POSIX = Convert-ToMsysPath $effectiveCodexDir
+    GLOBAL_MEMORY_DIR_POSIX = Convert-ToMsysPath $effectiveGlobalMemoryDir
+    HOME_DIR_WINDOWS = $effectiveHome
+    CODEX_DIR_WINDOWS = $effectiveCodexDir
+    GLOBAL_MEMORY_DIR_WINDOWS = $effectiveGlobalMemoryDir
   }
 
   Render-Template `
@@ -364,6 +413,14 @@ function Invoke-InitProject {
     GLOBAL_MEMORY_DIR = $effectiveGlobalMemoryDir
     REPO_ROOT = $effectiveRepoRoot
     PROJECT_NAME = $effectiveProjectName
+    HOME_DIR_POSIX = Convert-ToMsysPath $effectiveHome
+    CODEX_DIR_POSIX = Convert-ToMsysPath $effectiveCodexDir
+    GLOBAL_MEMORY_DIR_POSIX = Convert-ToMsysPath $effectiveGlobalMemoryDir
+    REPO_ROOT_POSIX = Convert-ToMsysPath $effectiveRepoRoot
+    HOME_DIR_WINDOWS = $effectiveHome
+    CODEX_DIR_WINDOWS = $effectiveCodexDir
+    GLOBAL_MEMORY_DIR_WINDOWS = $effectiveGlobalMemoryDir
+    REPO_ROOT_WINDOWS = $effectiveRepoRoot
   }
 
   Render-Template `

@@ -20,6 +20,13 @@
 
 Не храни здесь проектную архитектуру или историю реализации конкретного проекта.
 
+## Форматы Путей
+
+- В файлах памяти держи точные ссылки, нужные для проверок в используемых окружениях.
+- Git Bash/MSYS и POSIX-проверки используют формат `/c/...`, например `{{GLOBAL_MEMORY_DIR_POSIX}}/global-collaboration-rules.md` и `{{GLOBAL_MEMORY_DIR_POSIX}}/memory-architecture.md`.
+- PowerShell и shell-команды Codex Desktop используют формат `C:\...`, например `{{GLOBAL_MEMORY_DIR_WINDOWS}}\global-collaboration-rules.md` и `{{GLOBAL_MEMORY_DIR_WINDOWS}}\memory-architecture.md`.
+- Когда открываешь файл shell-командой, выбирай формат активной оболочки, а не переписывай канонические ссылки ради другого окружения.
+
 ## Проектный Слой
 
 Предпочтительное соглашение внутри проекта:

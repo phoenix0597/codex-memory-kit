@@ -16,6 +16,12 @@
 8. `memory/YYYY-MM-DD.md` за сегодня, если файл существует; затем последнюю недавнюю ежедневную заметку при необходимости
 9. Тематические файлы, на которые ссылается релевантная ежедневная заметка
 
+## Форматы Путей
+
+- Git Bash/MSYS и POSIX-проверки: `{{GLOBAL_MEMORY_DIR_POSIX}}/global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_POSIX}}/memory-architecture.md`; `{{REPO_ROOT_POSIX}}/memory/current-work-queue.md`.
+- PowerShell и shell-команды Codex Desktop: `{{GLOBAL_MEMORY_DIR_WINDOWS}}\global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_WINDOWS}}\memory-architecture.md`; `{{REPO_ROOT_WINDOWS}}\memory\current-work-queue.md`.
+- Когда открываешь файл из памяти shell-командой, используй формат активной оболочки. Не меняй канонические ссылки только ради другого формата пути, если они нужны проверке memory kit.
+
 ## Роли Канонических Файлов
 
 - `technical-specification-mvp.md` - канонический источник требований к продукту и реализации, если файл существует
