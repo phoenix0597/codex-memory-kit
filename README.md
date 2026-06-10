@@ -99,7 +99,33 @@ git clone git@github.com:phoenix0597/codex-memory-kit.git "$HOME\.codex\codex-me
 Set-Location "$HOME\.codex\codex-memory-kit"
 ```
 
+Рекомендуемый путь в Git Bash на Windows:
+
+```bash
+git clone git@github.com:phoenix0597/codex-memory-kit.git "$HOME/.codex/codex-memory-kit"
+cd "$HOME/.codex/codex-memory-kit"
+```
+
 Клонировать именно в `.codex/codex-memory-kit` не обязательно. Рабочие файлы создаются по значениям `--home`, `--repo`, `-Home`, `-Repo` и связанным аргументам, а не по месту, где лежит сам набор.
+
+## Особенности Путей На Windows
+
+На разных устройствах имя пользователя в абсолютных путях может отличаться: `phoen`, `Stas`, `stas`, `phoenix` и т.д. Поэтому memory-файлы не должны хранить machine-specific ссылки вроде `C:\Users\phoen\...` или `/c/Users/Stas/...`, если можно использовать более устойчивую форму:
+
+- глобальная память: `.codex/memories/...` относительно домашнего каталога пользователя;
+- команды PowerShell: `$HOME\.codex\memories\...`;
+- команды Git Bash/MSYS: `$HOME/.codex/memories/...`;
+- ссылки внутри проектной памяти: repo-relative пути вроде `AGENTS.md`, `assistant-memory.md`, `memory/current-work-queue.md`.
+
+Скрипты принимают `-Home`/`--home`, `-Repo`/`--repo`, `-CodexDir`/`--codex-dir` и `-GlobalMemoryDir`/`--global-memory-dir`, поэтому реальные абсолютные пути должны вычисляться во время запуска, а не записываться вручную в шаблоны памяти.
+
+Если из Git Bash нужно вызвать Windows-команду, которая принимает Windows-пути или ACL-выражения, отключай автоматическое преобразование аргументов:
+
+```bash
+MSYS_NO_PATHCONV=1 icacls 'C:\path\to\repo\.git' /grant 'PHOENIX-COMP\CodexSandboxOnline:(OI)(CI)M' /T
+```
+
+Без `MSYS_NO_PATHCONV=1` Git Bash может преобразовать `C:\...` или параметры `icacls` в неожиданный POSIX-вид.
 
 ## Установка В Linux, macOS И WSL
 
@@ -142,6 +168,47 @@ Set-Location "$HOME\.codex\codex-memory-kit"
 ```
 
 Скрипт также поддерживает `-Force`, `-DryRun`, `-SourceRoot`, `-CodexDir`, `-GlobalMemoryDir` и `-VerboseLog` там, где эти параметры применимы.
+
+## Установка Из Git Bash На Windows
+
+В нативном Windows-проекте предпочтительнее использовать PowerShell-скрипт, потому что он работает с Windows-путями и не зависит от `bash`, `sed`, `grep` или `cp`.
+
+Если всё же запускаешь POSIX-скрипты из Git Bash, передавай пути в MSYS/POSIX-формате и оставляй `$HOME` вычисляться текущей оболочкой:
+
+```bash
+./scripts/install.sh --home "$HOME"
+./scripts/init-project.sh --repo "$HOME/path/to/repo" --project-name my-project
+./scripts/check.sh --home "$HOME" --repo "$HOME/path/to/repo" --strict
+```
+
+Для репозитория на диске `C:` можно использовать MSYS-форму:
+
+```bash
+./scripts/init-project.sh --repo /c/path/to/repo --project-name my-project
+./scripts/check.sh --home "$HOME" --repo /c/path/to/repo --strict
+```
+
+Не записывай в memory-файлы конкретный путь вида `/c/Users/<name>/...`: при переносе на другое устройство такие ссылки быстро устаревают. Для shell-команд путь можно раскрывать из `$HOME`, а внутри проектных memory-файлов использовать относительные ссылки от корня репозитория.
+
+## Настройка Git-Прав Для Codex На Windows
+
+Если Codex работает под отдельным Windows-пользователем sandbox и не может выполнить `git add` или `git commit`, Git обычно сообщает о `dubious ownership`, невозможности создать `.git/index.lock` или отказе в доступе к `.git`. В этом случае пользователь может разрешить доступ к конкретному репозиторию.
+
+PowerShell:
+
+```powershell
+git config --global --add safe.directory C:/path/to/repo
+icacls "C:\path\to\repo\.git" /grant "PHOENIX-COMP\CodexSandboxOnline:(OI)(CI)M" /T
+```
+
+Git Bash:
+
+```bash
+git config --global --add safe.directory C:/path/to/repo
+MSYS_NO_PATHCONV=1 icacls 'C:\path\to\repo\.git' /grant 'PHOENIX-COMP\CodexSandboxOnline:(OI)(CI)M' /T
+```
+
+Если sandbox-пользователь называется иначе, подставь имя из сообщения Git, например `CodexSandboxOffline`. Для более широкого доступа можно выдать права на весь репозиторий, но минимальный вариант для commit обычно ограничивается `.git`.
 
 ## Экспорт И Импорт
 
@@ -214,6 +281,8 @@ PowerShell:
 - `init-project.sh` и команда `init-project` отвечают только за проектные файлы.
 - `check.sh` и команда `check` проверяют рабочую структуру, а не дерево исходных шаблонов.
 - Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`.
+- Шаблоны памяти должны предпочитать repo-relative ссылки и пути от домашнего каталога (`$HOME` / `$HOME\.codex`) вместо machine-specific абсолютных путей с конкретным именем пользователя.
+- Строгая проверка не должна требовать точного абсолютного пути внутри текстовых memory-файлов, если достаточно проверить устойчивую ссылку на нужный файл.
 
 ### Повторный Запуск
 

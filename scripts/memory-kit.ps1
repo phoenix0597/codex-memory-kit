@@ -547,12 +547,12 @@ function Invoke-Check {
     if ($Strict) {
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
-        (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md")) `
+        "global-collaboration-rules.md" `
         "нет ссылки на глобальные правила сотрудничества"
 
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
-        (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md")) `
+        "memory-architecture.md" `
         "нет ссылки на глобальную архитектуру памяти"
 
       Require-NoPlaceholders ([ref]$failures) (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md"))
@@ -573,22 +573,22 @@ function Invoke-Check {
     if ($Strict) {
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md")) `
-        (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md")) `
+        "global-collaboration-rules.md" `
         "нет ссылки на глобальные правила сотрудничества"
 
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md")) `
-        (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "current-work-queue.md")) `
+        "memory/current-work-queue.md" `
         "нет ссылки на текущую очередь работы"
 
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveRepoRoot, "START-HERE.md")) `
-        (Join-KitPath -Parts @($effectiveRepoRoot, "assistant-memory.md")) `
+        "assistant-memory.md" `
         "нет ссылки на assistant-memory.md"
 
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveRepoRoot, "assistant-memory.md")) `
-        (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md")) `
+        "memory-architecture.md" `
         "нет ссылки на глобальную архитектуру памяти"
 
       Require-NoPlaceholders ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md"))
