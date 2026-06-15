@@ -6,21 +6,22 @@
 
 В начале новой сессии прочитай эти файлы по порядку:
 
-1. `{{GLOBAL_MEMORY_DIR}}/global-collaboration-rules.md`
-2. `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`
-3. `{{REPO_ROOT}}/AGENTS.md`
-4. `{{REPO_ROOT}}/START-HERE.md`
-5. `{{REPO_ROOT}}/assistant-memory.md`
-6. `{{REPO_ROOT}}/technical-specification-mvp.md`, если файл существует
-7. `{{REPO_ROOT}}/memory/current-work-queue.md`, если файл существует
+1. Глобальные правила сотрудничества текущего пользователя: `.codex/memories/global-collaboration-rules.md` относительно домашнего каталога
+2. Глобальную архитектуру памяти текущего пользователя: `.codex/memories/memory-architecture.md` относительно домашнего каталога
+3. `AGENTS.md`
+4. `START-HERE.md`
+5. `assistant-memory.md`
+6. `technical-specification-mvp.md`, если файл существует
+7. `memory/current-work-queue.md`, если файл существует
 8. `memory/YYYY-MM-DD.md` за сегодня, если файл существует; затем последнюю недавнюю ежедневную заметку при необходимости
 9. Тематические файлы, на которые ссылается релевантная ежедневная заметка
 
 ## Форматы Путей
 
-- Git Bash/MSYS и POSIX-проверки: `{{GLOBAL_MEMORY_DIR_POSIX}}/global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_POSIX}}/memory-architecture.md`; `{{REPO_ROOT_POSIX}}/memory/current-work-queue.md`.
-- PowerShell и shell-команды Codex Desktop: `{{GLOBAL_MEMORY_DIR_WINDOWS}}\global-collaboration-rules.md`; `{{GLOBAL_MEMORY_DIR_WINDOWS}}\memory-architecture.md`; `{{REPO_ROOT_WINDOWS}}\memory\current-work-queue.md`.
-- Когда открываешь файл из памяти shell-командой, используй формат активной оболочки. Не меняй канонические ссылки только ради другого формата пути, если они нужны проверке memory kit.
+- Repo-local ссылки в проектной памяти должны быть относительными от корня репозитория: `AGENTS.md`, `assistant-memory.md`, `memory/current-work-queue.md`.
+- Глобальные memory-файлы находятся в домашнем каталоге текущего пользователя: для Git Bash/MSYS используй `$HOME/.codex/memories/...`, для PowerShell и shell-команд Codex Desktop используй `$HOME\.codex\memories\...`.
+- Когда открываешь файл из памяти shell-командой, используй формат активной оболочки.
+- Не добавляй machine-specific абсолютные пути в repo-local memory-файлы, если можно использовать относительный путь или путь от домашнего каталога.
 
 ## Роли Канонических Файлов
 
@@ -39,7 +40,7 @@
 2. Тематические файлы в `memory/topic-<slug>.md`
 3. Сжатая долговременная память в `assistant-memory.md`
 
-Эта проектная схема является локальной реализацией общей межпроектной архитектуры из `{{GLOBAL_MEMORY_DIR}}/memory-architecture.md`.
+Эта проектная схема является локальной реализацией общей межпроектной архитектуры из `.codex/memories/memory-architecture.md` относительно домашнего каталога текущего пользователя.
 
 Правила:
 

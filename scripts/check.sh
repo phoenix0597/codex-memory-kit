@@ -135,10 +135,10 @@ check_global() {
 
   if [ "$STRICT" -eq 1 ]; then
     require_contains "$HOME_DIR/AGENTS.md" \
-      "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" \
+      "global-collaboration-rules.md" \
       "нет ссылки на глобальные правила сотрудничества"
     require_contains "$HOME_DIR/AGENTS.md" \
-      "$GLOBAL_MEMORY_DIR/memory-architecture.md" \
+      "memory-architecture.md" \
       "нет ссылки на глобальную архитектуру памяти"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/memory-architecture.md"
@@ -157,16 +157,16 @@ check_project() {
 
   if [ "$STRICT" -eq 1 ]; then
     require_contains "$REPO_ROOT/AGENTS.md" \
-      "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" \
+      "global-collaboration-rules.md" \
       "нет ссылки на глобальные правила сотрудничества"
     require_contains "$REPO_ROOT/AGENTS.md" \
-      "$REPO_ROOT/memory/current-work-queue.md" \
+      "memory/current-work-queue.md" \
       "нет ссылки на текущую очередь работы"
     require_contains "$REPO_ROOT/START-HERE.md" \
-      "$REPO_ROOT/assistant-memory.md" \
+      "assistant-memory.md" \
       "нет ссылки на assistant-memory.md"
     require_contains "$REPO_ROOT/assistant-memory.md" \
-      "$GLOBAL_MEMORY_DIR/memory-architecture.md" \
+      "memory-architecture.md" \
       "нет ссылки на глобальную архитектуру памяти"
     require_no_placeholders "$REPO_ROOT/AGENTS.md"
     require_no_placeholders "$REPO_ROOT/START-HERE.md"
