@@ -444,6 +444,11 @@ function Invoke-InitProject {
     $variables
 
   Render-Template `
+    (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", "memory", "topic-memory-improvement.md.template")) `
+    (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "topic-memory-improvement.md")) `
+    $variables
+
+  Render-Template `
     (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", "memory", "_templates", "daily.md.template")) `
     (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "_templates", "daily.md")) `
     $variables
@@ -567,6 +572,7 @@ function Invoke-Check {
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "START-HERE.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "assistant-memory.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "current-work-queue.md"))
+    Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "topic-memory-improvement.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "_templates", "daily.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "_templates", "topic.md"))
 

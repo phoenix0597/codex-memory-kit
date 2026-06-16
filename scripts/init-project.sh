@@ -253,6 +253,8 @@ render_template "$SOURCE_ROOT/templates/project/START-HERE.md.template" "$REPO_R
 render_template "$SOURCE_ROOT/templates/project/assistant-memory.md.template" "$REPO_ROOT/assistant-memory.md"
 render_template "$SOURCE_ROOT/templates/project/memory/current-work-queue.md.template" \
   "$REPO_ROOT/memory/current-work-queue.md"
+render_template "$SOURCE_ROOT/templates/project/memory/topic-memory-improvement.md.template" \
+  "$REPO_ROOT/memory/topic-memory-improvement.md"
 render_template "$SOURCE_ROOT/templates/project/memory/_templates/daily.md.template" \
   "$REPO_ROOT/memory/_templates/daily.md"
 render_template "$SOURCE_ROOT/templates/project/memory/_templates/topic.md.template" \

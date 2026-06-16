@@ -23,6 +23,7 @@
 - `<repo>/START-HERE.md`
 - `<repo>/assistant-memory.md`
 - `<repo>/memory/current-work-queue.md`
+- `<repo>/memory/topic-memory-improvement.md`
 - `<repo>/memory/_templates/daily.md`
 - `<repo>/memory/_templates/topic.md`
 

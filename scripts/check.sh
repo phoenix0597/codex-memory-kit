@@ -152,6 +152,7 @@ check_project() {
   require_file "$REPO_ROOT/START-HERE.md"
   require_file "$REPO_ROOT/assistant-memory.md"
   require_file "$REPO_ROOT/memory/current-work-queue.md"
+  require_file "$REPO_ROOT/memory/topic-memory-improvement.md"
   require_file "$REPO_ROOT/memory/_templates/daily.md"
   require_file "$REPO_ROOT/memory/_templates/topic.md"
 
