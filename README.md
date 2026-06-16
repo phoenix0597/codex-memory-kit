@@ -141,6 +141,13 @@ MSYS_NO_PATHCONV=1 icacls 'C:\path\to\repo\.git' /grant 'PHOENIX-COMP\CodexSandb
 Инициализировать проектную память:
 
 ```bash
+cd /path/to/repo
+~/.codex/codex-memory-kit/scripts/init-project.sh
+```
+
+Если нужно запустить инициализацию из другого каталога или задать имя проекта вручную:
+
+```bash
 ./scripts/init-project.sh --repo /path/to/repo --project-name my-project
 ```
 
@@ -159,6 +166,13 @@ MSYS_NO_PATHCONV=1 icacls 'C:\path\to\repo\.git' /grant 'PHOENIX-COMP\CodexSandb
 ```
 
 Инициализировать проектную память:
+
+```powershell
+Set-Location C:\path\to\repo
+$HOME\.codex\codex-memory-kit\scripts\memory-kit.ps1 init-project
+```
+
+Если нужно запустить инициализацию из другого каталога или задать имя проекта вручную:
 
 ```powershell
 .\scripts\memory-kit.ps1 init-project -Repo C:\path\to\repo -ProjectName my-project
@@ -180,14 +194,16 @@ MSYS_NO_PATHCONV=1 icacls 'C:\path\to\repo\.git' /grant 'PHOENIX-COMP\CodexSandb
 
 ```bash
 ./scripts/install.sh --home "$HOME"
-./scripts/init-project.sh --repo "$HOME/path/to/repo" --project-name my-project
+cd "$HOME/path/to/repo"
+"$HOME/.codex/codex-memory-kit/scripts/init-project.sh"
 ./scripts/check.sh --home "$HOME" --repo "$HOME/path/to/repo" --strict
 ```
 
 Для репозитория на диске `C:` можно использовать MSYS-форму:
 
 ```bash
-./scripts/init-project.sh --repo /c/path/to/repo --project-name my-project
+cd /c/path/to/repo
+"$HOME/.codex/codex-memory-kit/scripts/init-project.sh"
 ./scripts/check.sh --home "$HOME" --repo /c/path/to/repo --strict
 ```
 
@@ -283,7 +299,7 @@ PowerShell:
 - `install.sh` и команда `install` отвечают только за домашний и глобальный слои.
 - `init-project.sh` и команда `init-project` отвечают только за проектные файлы.
 - `check.sh` и команда `check` проверяют рабочую структуру, а не дерево исходных шаблонов.
-- Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`.
+- Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`. Для `init-project` отсутствие `--repo` / `-Repo` означает текущий каталог.
 - Шаблоны памяти должны предпочитать repo-relative ссылки и пути от домашнего каталога (`$HOME` / `$HOME\.codex`) вместо machine-specific абсолютных путей с конкретным именем пользователя.
 - Строгая проверка не должна требовать точного абсолютного пути внутри текстовых memory-файлов, если достаточно проверить устойчивую ссылку на нужный файл.
 

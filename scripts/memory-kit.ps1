@@ -39,7 +39,7 @@ function Show-Usage {
   @"
 Использование:
   .\scripts\memory-kit.ps1 install [-Home <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog] [-NoHomeAgents]
-  .\scripts\memory-kit.ps1 init-project -Repo <path> [-ProjectName <name>] [-Home <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog]
+  .\scripts\memory-kit.ps1 init-project [-Repo <path>] [-ProjectName <name>] [-Home <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog]
   .\scripts\memory-kit.ps1 check [-Home <path>] [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Mode <global|project|all>] [-Strict] [-VerboseLog]
   .\scripts\memory-kit.ps1 export [-Home <path>] -OutputDir <path> [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
   .\scripts\memory-kit.ps1 import -InputDir <path> [-Home <path>] [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
@@ -235,6 +235,9 @@ function Get-EffectiveSourceRoot {
 
 function Get-RequiredRepoRoot {
   if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    if ($Command -eq "init-project") {
+      return Resolve-KitPath ((Get-Location).Path)
+    }
     throw "Укажите -Repo <path>."
   }
   return Resolve-KitPath $RepoRoot

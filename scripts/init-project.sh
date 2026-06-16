@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Использование: init-project.sh --repo <path> [--project-name <name>] [--home <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose]
+Использование: init-project.sh [--repo <path>] [--project-name <name>] [--home <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--source-root <path>] [--force] [--dry-run] [--verbose]
 EOF
 }
 
@@ -66,10 +66,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -z "${REPO_ROOT}" ]; then
-  usage
-  exit 2
-fi
+REPO_ROOT=${REPO_ROOT:-$(pwd)}
 
 if [ "${REPO_ROOT#/}" = "$REPO_ROOT" ]; then
   printf 'Укажите абсолютный путь к репозиторию.\n' >&2
