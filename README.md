@@ -162,8 +162,11 @@ cd /path/to/repo
 Проверить результат:
 
 ```bash
-./scripts/check.sh --home "$HOME" --repo /path/to/repo --strict
+cd /path/to/repo
+~/.codex/codex-memory-kit/scripts/check.sh --strict
 ```
+
+Если нужно запустить проверку из другого каталога, путь к репозиторию можно передать явно через `--repo`.
 
 ## Установка В Windows
 
@@ -189,8 +192,11 @@ $HOME\.codex\codex-memory-kit\scripts\memory-kit.ps1 init-project
 Проверить результат:
 
 ```powershell
-.\scripts\memory-kit.ps1 check -Home $HOME -Repo C:\path\to\repo -Strict
+Set-Location C:\path\to\repo
+$HOME\.codex\codex-memory-kit\scripts\memory-kit.ps1 check -Strict
 ```
+
+Если нужно запустить проверку из другого каталога, путь к репозиторию можно передать явно через `-Repo`.
 
 Скрипт также поддерживает `-Force`, `-DryRun`, `-SourceRoot`, `-CodexDir`, `-GlobalMemoryDir` и `-VerboseLog` там, где эти параметры применимы.
 
@@ -204,7 +210,7 @@ $HOME\.codex\codex-memory-kit\scripts\memory-kit.ps1 init-project
 ./scripts/install.sh --home "$HOME"
 cd "$HOME/path/to/repo"
 "$HOME/.codex/codex-memory-kit/scripts/init-project.sh"
-./scripts/check.sh --home "$HOME" --repo "$HOME/path/to/repo" --strict
+"$HOME/.codex/codex-memory-kit/scripts/check.sh" --strict
 ```
 
 Для репозитория на диске `C:` можно использовать MSYS-форму:
@@ -212,7 +218,7 @@ cd "$HOME/path/to/repo"
 ```bash
 cd /c/path/to/repo
 "$HOME/.codex/codex-memory-kit/scripts/init-project.sh"
-./scripts/check.sh --home "$HOME" --repo /c/path/to/repo --strict
+"$HOME/.codex/codex-memory-kit/scripts/check.sh" --strict
 ```
 
 Не записывай в memory-файлы конкретный путь вида `/c/Users/<name>/...`: при переносе на другое устройство такие ссылки быстро устаревают. Для shell-команд путь можно раскрывать из `$HOME`, а внутри проектных memory-файлов использовать относительные ссылки от корня репозитория.
@@ -307,7 +313,7 @@ PowerShell:
 - `install.sh` и команда `install` отвечают только за домашний и глобальный слои.
 - `init-project.sh` и команда `init-project` отвечают только за проектные файлы.
 - `check.sh` и команда `check` проверяют рабочую структуру, а не дерево исходных шаблонов.
-- Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`. Для `init-project` отсутствие `--repo` / `-Repo` означает текущий каталог.
+- Ни один скрипт не должен предполагать фиксированное имя пользователя; абсолютные пути выводятся из `--home`, `--repo`, `-Home` или `-Repo`. Для `init-project` и `check` отсутствие `--repo` / `-Repo` означает текущий каталог.
 - Шаблоны памяти должны предпочитать repo-relative ссылки и пути от домашнего каталога (`$HOME` / `$HOME\.codex`) вместо machine-specific абсолютных путей с конкретным именем пользователя.
 - Строгая проверка не должна требовать точного абсолютного пути внутри текстовых memory-файлов, если достаточно проверить устойчивую ссылку на нужный файл.
 

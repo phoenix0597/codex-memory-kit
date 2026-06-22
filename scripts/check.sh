@@ -3,11 +3,11 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF' >&2
-Использование: check.sh --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--strict] [--verbose]
+Использование: check.sh [--home <path>] [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--strict] [--verbose]
 EOF
 }
 
-HOME_DIR=
+HOME_DIR=${HOME:-}
 REPO_ROOT=
 CODEX_DIR=
 GLOBAL_MEMORY_DIR=
@@ -66,10 +66,7 @@ if [ "$MODE" = "global" ] || [ "$MODE" = "all" ]; then
 fi
 
 if [ "$MODE" = "project" ] || [ "$MODE" = "all" ]; then
-  if [ -z "$REPO_ROOT" ]; then
-    usage
-    exit 2
-  fi
+  REPO_ROOT=${REPO_ROOT:-$(pwd)}
 fi
 
 CODEX_DIR=${CODEX_DIR:-"$HOME_DIR/.codex"}

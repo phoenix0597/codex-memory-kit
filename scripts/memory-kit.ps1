@@ -235,7 +235,7 @@ function Get-EffectiveSourceRoot {
 
 function Get-RequiredRepoRoot {
   if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
-    if ($Command -eq "init-project") {
+    if ($Command -eq "init-project" -or $Command -eq "check") {
       return Resolve-KitPath ((Get-Location).Path)
     }
     throw "Укажите -Repo <path>."
