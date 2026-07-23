@@ -248,6 +248,8 @@ fi
 render_template "$SOURCE_ROOT/templates/project/AGENTS.md.template" "$REPO_ROOT/AGENTS.md"
 render_template "$SOURCE_ROOT/templates/project/START-HERE.md.template" "$REPO_ROOT/START-HERE.md"
 render_template "$SOURCE_ROOT/templates/project/assistant-memory.md.template" "$REPO_ROOT/assistant-memory.md"
+render_template "$SOURCE_ROOT/templates/project/.gemini/rules/antigravity-memory-adapter.md.template" "$REPO_ROOT/.gemini/rules/antigravity-memory-adapter.md"
+
 render_template "$SOURCE_ROOT/templates/project/memory/current-work-queue.md.template" \
   "$REPO_ROOT/memory/current-work-queue.md"
 render_template "$SOURCE_ROOT/templates/project/memory/topic-memory-improvement.md.template" \

@@ -1,4 +1,4 @@
-﻿#requires -Version 5.1
+#requires -Version 5.1
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true, Position = 0)]
@@ -440,6 +440,12 @@ function Invoke-InitProject {
     (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", "assistant-memory.md.template")) `
     (Join-KitPath -Parts @($effectiveRepoRoot, "assistant-memory.md")) `
     $variables
+
+  Render-Template `
+    (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", ".gemini", "rules", "antigravity-memory-adapter.md.template")) `
+    (Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")) `
+    $variables
+
 
   Render-Template `
     (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", "memory", "current-work-queue.md.template")) `
