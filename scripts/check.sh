@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+
 usage() {
   cat <<'EOF' >&2
-Использование: check.sh [--home <path>] [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--strict] [--verbose]
+Использование: check.sh [--home <path>] [--repo <path>] [--agent <codex|dsh|antigravity|all|none>] [--dsh-dir <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--mode <global|project|all>] [--no-home-agents] [--strict] [--verbose]
 EOF
 }
 
 HOME_DIR=${HOME:-}
 REPO_ROOT=
 CODEX_DIR=
+DSH_DIR=
+AGENT=codex
 GLOBAL_MEMORY_DIR=
 MODE=all
 STRICT=0
 VERBOSE=0
 FAILURES=0
+INSTALL_HOME_AGENTS=1
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -24,6 +29,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --repo)
       REPO_ROOT=${2:-}
+      shift 2
+      ;;
+    --dsh-dir)
+      DSH_DIR=${2:-}
+      shift 2
+      ;;
+    --agent)
+      AGENT=${2:-}
       shift 2
       ;;
     --codex-dir)
@@ -37,6 +50,10 @@ while [ "$#" -gt 0 ]; do
     --mode)
       MODE=${2:-}
       shift 2
+      ;;
+    --no-home-agents)
+      INSTALL_HOME_AGENTS=0
+      shift
       ;;
     --strict)
       STRICT=1
@@ -69,8 +86,8 @@ if [ "$MODE" = "project" ] || [ "$MODE" = "all" ]; then
   REPO_ROOT=${REPO_ROOT:-$(pwd)}
 fi
 
-CODEX_DIR=${CODEX_DIR:-"$HOME_DIR/.codex"}
-GLOBAL_MEMORY_DIR=${GLOBAL_MEMORY_DIR:-"$CODEX_DIR/memories"}
+. "$SCRIPT_DIR/lib-memory.sh"
+resolve_memory_paths
 
 check_ok() {
   printf 'CHECK OK %s\n' "$1"
@@ -124,23 +141,52 @@ require_no_placeholders() {
   fi
 }
 
+require_memory_link() {
+  local path=$1 filename=$2 relative
+  if [ ! -f "$path" ]; then
+    check_fail "$path" "обязательный файл отсутствует"
+    return
+  fi
+  if grep -Fq -- "\`$GLOBAL_MEMORY_DIR/$filename\`" "$path"; then
+    check_ok "$path"
+    return
+  fi
+  case "$GLOBAL_MEMORY_DIR" in
+    "$HOME_DIR"/*)
+      relative=${GLOBAL_MEMORY_DIR#"$HOME_DIR/"}/$filename
+      if grep -Fq -- "\`$relative\`" "$path" || grep -Fq -- "\`\$HOME/$relative\`" "$path"; then
+        check_ok "$path"
+        return
+      fi
+      ;;
+  esac
+  check_fail "$path" "нет ссылки на выбранную общую память: $filename"
+}
+
 check_global() {
   log "Проверка глобальных файлов: $GLOBAL_MEMORY_DIR"
   require_file "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
   require_file "$GLOBAL_MEMORY_DIR/memory-architecture.md"
-  require_file "$HOME_DIR/AGENTS.md"
-
+  if { [ "$AGENT" = codex ] || [ "$AGENT" = all ]; } && [ -s "$CODEX_DIR/AGENTS.override.md" ]; then
+    check_fail "$CODEX_DIR/AGENTS.override.md" "override скрывает стартовый файл Codex; проверь его содержимое"
+  fi
   if [ "$STRICT" -eq 1 ]; then
-    require_contains "$HOME_DIR/AGENTS.md" \
-      "global-collaboration-rules.md" \
-      "нет ссылки на глобальные правила сотрудничества"
-    require_contains "$HOME_DIR/AGENTS.md" \
-      "memory-architecture.md" \
-      "нет ссылки на глобальную архитектуру памяти"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
     require_no_placeholders "$GLOBAL_MEMORY_DIR/memory-architecture.md"
-    require_no_placeholders "$HOME_DIR/AGENTS.md"
   fi
+  local entrypoint
+  while IFS= read -r entrypoint; do
+    [ -n "$entrypoint" ] || continue
+    require_file "$entrypoint"
+    if [ "$STRICT" -eq 1 ]; then
+      require_memory_link "$entrypoint" global-collaboration-rules.md
+      require_memory_link "$entrypoint" memory-architecture.md
+      require_no_placeholders "$entrypoint"
+    fi
+  done < <(
+    if [ "$INSTALL_HOME_AGENTS" -eq 1 ]; then printf '%s\n' "$HOME_DIR/AGENTS.md"; fi
+    agent_entrypoints
+  )
 }
 
 check_project() {
@@ -153,10 +199,20 @@ check_project() {
   require_file "$REPO_ROOT/memory/_templates/daily.md"
   require_file "$REPO_ROOT/memory/_templates/topic.md"
 
+  if [ "$AGENT" = antigravity ] || [ "$AGENT" = all ]; then
+    require_file "$REPO_ROOT/.gemini/rules/antigravity-memory-adapter.md"
+    if [ "$STRICT" -eq 1 ]; then
+      require_no_placeholders "$REPO_ROOT/.gemini/rules/antigravity-memory-adapter.md"
+      require_memory_link "$REPO_ROOT/.gemini/rules/antigravity-memory-adapter.md" global-collaboration-rules.md
+    fi
+  fi
+
   if [ "$STRICT" -eq 1 ]; then
-    require_contains "$REPO_ROOT/AGENTS.md" \
-      "global-collaboration-rules.md" \
-      "нет ссылки на глобальные правила сотрудничества"
+    local file
+    for file in AGENTS.md START-HERE.md assistant-memory.md; do
+      require_memory_link "$REPO_ROOT/$file" global-collaboration-rules.md
+      require_memory_link "$REPO_ROOT/$file" memory-architecture.md
+    done
     require_contains "$REPO_ROOT/AGENTS.md" \
       "memory/current-work-queue.md" \
       "нет ссылки на текущую очередь работы"

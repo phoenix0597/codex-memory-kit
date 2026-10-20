@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true, Position = 0)]
@@ -13,6 +13,9 @@ param(
 
   [string]$ProjectName,
   [string]$CodexDir,
+  [string]$DshDir,
+  [ValidateSet("codex", "dsh", "antigravity", "all", "none")]
+  [string]$Agent = "codex",
   [string]$GlobalMemoryDir,
   [string]$SourceRoot,
   [string]$OutputDir,
@@ -38,11 +41,11 @@ $Utf8WithBom = New-Object System.Text.UTF8Encoding -ArgumentList $true
 function Show-Usage {
   @"
 Использование:
-  .\scripts\memory-kit.ps1 install [-Home <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog] [-NoHomeAgents]
-  .\scripts\memory-kit.ps1 init-project [-Repo <path>] [-ProjectName <name>] [-Home <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog]
-  .\scripts\memory-kit.ps1 check [-Home <path>] [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Mode <global|project|all>] [-Strict] [-VerboseLog]
-  .\scripts\memory-kit.ps1 export [-Home <path>] -OutputDir <path> [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
-  .\scripts\memory-kit.ps1 import -InputDir <path> [-Home <path>] [-Repo <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
+  .\scripts\memory-kit.ps1 install [-Home <path>] [-Agent <codex|dsh|antigravity|all|none>] [-DshDir <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog] [-NoHomeAgents]
+  .\scripts\memory-kit.ps1 init-project [-Repo <path>] [-ProjectName <name>] [-Home <path>] [-Agent <codex|dsh|antigravity|all|none>] [-DshDir <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-SourceRoot <path>] [-Force] [-DryRun] [-VerboseLog]
+  .\scripts\memory-kit.ps1 check [-Home <path>] [-Repo <path>] [-Agent <codex|dsh|antigravity|all|none>] [-DshDir <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Mode <global|project|all>] [-Strict] [-VerboseLog]
+  .\scripts\memory-kit.ps1 export [-Home <path>] -OutputDir <path> [-Repo <path>] [-Agent <codex|dsh|antigravity|all|none>] [-DshDir <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
+  .\scripts\memory-kit.ps1 import -InputDir <path> [-Home <path>] [-Repo <path>] [-Agent <codex|dsh|antigravity|all|none>] [-DshDir <path>] [-CodexDir <path>] [-GlobalMemoryDir <path>] [-Force] [-DryRun] [-VerboseLog]
 "@
 }
 
@@ -218,12 +221,31 @@ function Get-EffectiveCodexDir {
   return Join-Path $EffectiveHome ".codex"
 }
 
+function Get-EffectiveDshDir {
+  param([Parameter(Mandatory = $true)][string]$EffectiveHome)
+  if (-not [string]::IsNullOrWhiteSpace($DshDir)) { return Resolve-KitPath $DshDir }
+  return Join-Path $EffectiveHome ".dsh"
+}
+
+function Get-AgentEntrypoints {
+  param([string]$EffectiveCodexDir, [string]$EffectiveDshDir)
+  if ($Agent -eq "codex" -or $Agent -eq "all") { Join-Path $EffectiveCodexDir "AGENTS.md" }
+  if ($Agent -eq "dsh" -or $Agent -eq "all") { Join-Path $EffectiveDshDir "AGENTS.md" }
+}
+
 function Get-EffectiveGlobalMemoryDir {
   param([Parameter(Mandatory = $true)][string]$EffectiveCodexDir)
   if (-not [string]::IsNullOrWhiteSpace($GlobalMemoryDir)) {
     return Resolve-KitPath $GlobalMemoryDir
   }
-  return Join-Path $EffectiveCodexDir "memories"
+  $legacyMemory = Join-Path $EffectiveCodexDir "memories"
+  if (-not [string]::IsNullOrWhiteSpace($CodexDir)) { return $legacyMemory }
+  $sharedMemory = Join-KitPath -Parts @((Get-EffectiveHome), ".agents", "memories")
+  if ((Test-Path -LiteralPath $sharedMemory -PathType Container) -and (Test-Path -LiteralPath $legacyMemory -PathType Container)) {
+    throw "Both shared and legacy memory exist; select -GlobalMemoryDir explicitly."
+  }
+  if (Test-Path -LiteralPath $legacyMemory -PathType Container) { return $legacyMemory }
+  return $sharedMemory
 }
 
 function Get-EffectiveSourceRoot {
@@ -347,6 +369,7 @@ function Render-DailyFile {
 function Invoke-Install {
   $effectiveHome = Get-EffectiveHome
   $effectiveCodexDir = Get-EffectiveCodexDir $effectiveHome
+  $effectiveDshDir = Get-EffectiveDshDir $effectiveHome
   $effectiveGlobalMemoryDir = Get-EffectiveGlobalMemoryDir $effectiveCodexDir
   $effectiveSourceRoot = Get-EffectiveSourceRoot
 
@@ -359,12 +382,18 @@ function Invoke-Install {
 
   $variables = @{
     HOME_DIR = $effectiveHome
+    DSH_DIR = $effectiveDshDir
+    KIT_ROOT = $effectiveSourceRoot
     CODEX_DIR = $effectiveCodexDir
     GLOBAL_MEMORY_DIR = $effectiveGlobalMemoryDir
     HOME_DIR_POSIX = Convert-ToMsysPath $effectiveHome
+    DSH_DIR_POSIX = Convert-ToMsysPath $effectiveDshDir
+    KIT_ROOT_POSIX = Convert-ToMsysPath $effectiveSourceRoot
     CODEX_DIR_POSIX = Convert-ToMsysPath $effectiveCodexDir
     GLOBAL_MEMORY_DIR_POSIX = Convert-ToMsysPath $effectiveGlobalMemoryDir
     HOME_DIR_WINDOWS = $effectiveHome
+    DSH_DIR_WINDOWS = $effectiveDshDir
+    KIT_ROOT_WINDOWS = $effectiveSourceRoot
     CODEX_DIR_WINDOWS = $effectiveCodexDir
     GLOBAL_MEMORY_DIR_WINDOWS = $effectiveGlobalMemoryDir
   }
@@ -385,6 +414,10 @@ function Invoke-Install {
       (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
       $variables
   }
+  foreach ($entrypoint in @(Get-AgentEntrypoints $effectiveCodexDir $effectiveDshDir)) {
+    Render-Template (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "agent", "AGENTS.md.template")) $entrypoint $variables
+  }
+
 }
 
 function Invoke-InitProject {
@@ -395,6 +428,7 @@ function Invoke-InitProject {
 
   $effectiveHome = Get-EffectiveHome
   $effectiveCodexDir = Get-EffectiveCodexDir $effectiveHome
+  $effectiveDshDir = Get-EffectiveDshDir $effectiveHome
   $effectiveGlobalMemoryDir = Get-EffectiveGlobalMemoryDir $effectiveCodexDir
   $effectiveSourceRoot = Get-EffectiveSourceRoot
   $effectiveProjectName = $ProjectName
@@ -412,15 +446,21 @@ function Invoke-InitProject {
 
   $variables = @{
     HOME_DIR = $effectiveHome
+    DSH_DIR = $effectiveDshDir
+    KIT_ROOT = $effectiveSourceRoot
     CODEX_DIR = $effectiveCodexDir
     GLOBAL_MEMORY_DIR = $effectiveGlobalMemoryDir
     REPO_ROOT = $effectiveRepoRoot
     PROJECT_NAME = $effectiveProjectName
     HOME_DIR_POSIX = Convert-ToMsysPath $effectiveHome
+    DSH_DIR_POSIX = Convert-ToMsysPath $effectiveDshDir
+    KIT_ROOT_POSIX = Convert-ToMsysPath $effectiveSourceRoot
     CODEX_DIR_POSIX = Convert-ToMsysPath $effectiveCodexDir
     GLOBAL_MEMORY_DIR_POSIX = Convert-ToMsysPath $effectiveGlobalMemoryDir
     REPO_ROOT_POSIX = Convert-ToMsysPath $effectiveRepoRoot
     HOME_DIR_WINDOWS = $effectiveHome
+    DSH_DIR_WINDOWS = $effectiveDshDir
+    KIT_ROOT_WINDOWS = $effectiveSourceRoot
     CODEX_DIR_WINDOWS = $effectiveCodexDir
     GLOBAL_MEMORY_DIR_WINDOWS = $effectiveGlobalMemoryDir
     REPO_ROOT_WINDOWS = $effectiveRepoRoot
@@ -441,10 +481,12 @@ function Invoke-InitProject {
     (Join-KitPath -Parts @($effectiveRepoRoot, "assistant-memory.md")) `
     $variables
 
-  Render-Template `
-    (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", ".gemini", "rules", "antigravity-memory-adapter.md.template")) `
-    (Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")) `
-    $variables
+  if ($Agent -eq "antigravity" -or $Agent -eq "all") {
+    Render-Template `
+      (Join-KitPath -Parts @($effectiveSourceRoot, "templates", "project", ".gemini", "rules", "antigravity-memory-adapter.md.template")) `
+      (Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")) `
+      $variables
+  }
 
 
   Render-Template `
@@ -541,9 +583,30 @@ function Require-NoPlaceholders {
   }
 }
 
+function Require-MemoryLink {
+  param([ref]$Failures, [string]$Path, [string]$Filename, [string]$MemoryDir, [string]$EffectiveHome)
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+    Add-CheckFailure $Failures $Path "обязательный файл отсутствует"
+    return
+  }
+  $content = Read-Utf8File $Path
+  $tick = [string][char]96
+  $needles = @((Join-Path $MemoryDir $Filename), ((Convert-ToMsysPath $MemoryDir) + "/" + $Filename))
+  if ($MemoryDir.StartsWith($EffectiveHome + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+    $relative = $MemoryDir.Substring($EffectiveHome.Length + 1).Replace("\", "/") + "/" + $Filename
+    $needles += $relative
+    $needles += '$HOME/' + $relative
+  }
+  foreach ($needle in $needles) {
+    if ($content.Contains($tick + $needle + $tick)) { Add-CheckOk $Path; return }
+  }
+  Add-CheckFailure $Failures $Path "нет ссылки на выбранную общую память: $Filename"
+}
+
 function Invoke-Check {
   $effectiveHome = Get-EffectiveHome
   $effectiveCodexDir = Get-EffectiveCodexDir $effectiveHome
+  $effectiveDshDir = Get-EffectiveDshDir $effectiveHome
   $effectiveGlobalMemoryDir = Get-EffectiveGlobalMemoryDir $effectiveCodexDir
   $effectiveRepoRoot = $null
   if ($Mode -eq "project" -or $Mode -eq "all") {
@@ -556,22 +619,25 @@ function Invoke-Check {
     Write-KitLog "Проверка глобальных файлов: $effectiveGlobalMemoryDir"
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md"))
-    Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveHome, "AGENTS.md"))
-
+    $override = Join-Path $effectiveCodexDir "AGENTS.override.md"
+    if (($Agent -eq "codex" -or $Agent -eq "all") -and (Test-Path -LiteralPath $override -PathType Leaf)) {
+      if (-not [string]::IsNullOrWhiteSpace((Read-Utf8File $override))) {
+        Add-CheckFailure ([ref]$failures) $override "override скрывает стартовый файл Codex; проверь его содержимое"
+      }
+    }
+    $entrypoints = @(Get-AgentEntrypoints $effectiveCodexDir $effectiveDshDir)
+    if (-not $NoHomeAgents) { $entrypoints += Join-Path $effectiveHome "AGENTS.md" }
+    foreach ($entrypoint in $entrypoints) {
+      Require-File ([ref]$failures) $entrypoint
+      if ($Strict) {
+        Require-MemoryLink ([ref]$failures) $entrypoint "global-collaboration-rules.md" $effectiveGlobalMemoryDir $effectiveHome
+        Require-MemoryLink ([ref]$failures) $entrypoint "memory-architecture.md" $effectiveGlobalMemoryDir $effectiveHome
+        Require-NoPlaceholders ([ref]$failures) $entrypoint
+      }
+    }
     if ($Strict) {
-      Require-Contains ([ref]$failures) `
-        (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
-        "global-collaboration-rules.md" `
-        "нет ссылки на глобальные правила сотрудничества"
-
-      Require-Contains ([ref]$failures) `
-        (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
-        "memory-architecture.md" `
-        "нет ссылки на глобальную архитектуру памяти"
-
-      Require-NoPlaceholders ([ref]$failures) (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md"))
-      Require-NoPlaceholders ([ref]$failures) (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md"))
-      Require-NoPlaceholders ([ref]$failures) (Join-KitPath -Parts @($effectiveHome, "AGENTS.md"))
+      Require-NoPlaceholders ([ref]$failures) (Join-Path $effectiveGlobalMemoryDir "global-collaboration-rules.md")
+      Require-NoPlaceholders ([ref]$failures) (Join-Path $effectiveGlobalMemoryDir "memory-architecture.md")
     }
   }
 
@@ -585,11 +651,21 @@ function Invoke-Check {
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "_templates", "daily.md"))
     Require-File ([ref]$failures) (Join-KitPath -Parts @($effectiveRepoRoot, "memory", "_templates", "topic.md"))
 
+    if ($Agent -eq "antigravity" -or $Agent -eq "all") {
+      $adapter = Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")
+      Require-File ([ref]$failures) $adapter
+      if ($Strict) {
+        Require-NoPlaceholders ([ref]$failures) $adapter
+        Require-MemoryLink ([ref]$failures) $adapter "global-collaboration-rules.md" $effectiveGlobalMemoryDir $effectiveHome
+      }
+    }
+
     if ($Strict) {
-      Require-Contains ([ref]$failures) `
-        (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md")) `
-        "global-collaboration-rules.md" `
-        "нет ссылки на глобальные правила сотрудничества"
+      foreach ($file in @("AGENTS.md", "START-HERE.md", "assistant-memory.md")) {
+        $path = Join-Path $effectiveRepoRoot $file
+        Require-MemoryLink ([ref]$failures) $path "global-collaboration-rules.md" $effectiveGlobalMemoryDir $effectiveHome
+        Require-MemoryLink ([ref]$failures) $path "memory-architecture.md" $effectiveGlobalMemoryDir $effectiveHome
+      }
 
       Require-Contains ([ref]$failures) `
         (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md")) `
@@ -699,10 +775,10 @@ function Copy-KitTree {
 
   $parent = Split-Path -Parent $Destination
   New-Item -ItemType Directory -Force -Path $parent | Out-Null
-  if ($exists) {
-    Remove-Item -LiteralPath $Destination -Recurse -Force
+  New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+  Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
+    Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
   }
-  Copy-Item -LiteralPath $Source -Destination $Destination -Recurse
 
   if ($exists -and $Force) {
     Write-KitStatus "OVERWRITE $Destination"
@@ -718,6 +794,7 @@ function Invoke-Export {
 
   $effectiveHome = Get-EffectiveHome
   $effectiveCodexDir = Get-EffectiveCodexDir $effectiveHome
+  $effectiveDshDir = Get-EffectiveDshDir $effectiveHome
   $effectiveGlobalMemoryDir = Get-EffectiveGlobalMemoryDir $effectiveCodexDir
   $effectiveOutputDir = Resolve-KitPath $OutputDir
   $effectiveRepoRoot = $null
@@ -731,14 +808,19 @@ function Invoke-Export {
   }
 
   Copy-KitFile (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md")) `
-    (Join-KitPath -Parts @($effectiveOutputDir, "global", ".codex", "memories", "global-collaboration-rules.md")) `
+    (Join-KitPath -Parts @($effectiveOutputDir, "global", "memories", "global-collaboration-rules.md")) `
     "EXPORT" -Required
   Copy-KitFile (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md")) `
-    (Join-KitPath -Parts @($effectiveOutputDir, "global", ".codex", "memories", "memory-architecture.md")) `
+    (Join-KitPath -Parts @($effectiveOutputDir, "global", "memories", "memory-architecture.md")) `
     "EXPORT" -Required
   Copy-KitFile (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
     (Join-KitPath -Parts @($effectiveOutputDir, "global", "AGENTS.md")) `
-    "EXPORT" -Required
+    "EXPORT"
+  foreach ($kind in @("codex", "dsh")) {
+    if ($Agent -ne $kind -and $Agent -ne "all") { continue }
+    $agentDir = if ($kind -eq "codex") { $effectiveCodexDir } else { $effectiveDshDir }
+    Copy-KitFile (Join-Path $agentDir "AGENTS.md") (Join-KitPath -Parts @($effectiveOutputDir, "global", "agents", $kind, "AGENTS.md")) "EXPORT"
+  }
 
   if ($null -ne $effectiveRepoRoot) {
     Copy-KitFile (Join-KitPath -Parts @($effectiveRepoRoot, "AGENTS.md")) `
@@ -759,6 +841,10 @@ function Invoke-Export {
     Copy-KitTree (Join-KitPath -Parts @($effectiveRepoRoot, "memory")) `
       (Join-KitPath -Parts @($effectiveOutputDir, "project", "memory")) `
       "EXPORT" -Required
+    if ($Agent -eq "antigravity" -or $Agent -eq "all") {
+      Copy-KitFile (Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")) `
+        (Join-KitPath -Parts @($effectiveOutputDir, "project", ".gemini", "rules", "antigravity-memory-adapter.md")) "EXPORT"
+    }
   }
 }
 
@@ -770,6 +856,7 @@ function Invoke-Import {
   $effectiveInputDir = Resolve-KitPath $InputDir
   $effectiveHome = Get-EffectiveHome
   $effectiveCodexDir = Get-EffectiveCodexDir $effectiveHome
+  $effectiveDshDir = Get-EffectiveDshDir $effectiveHome
   $effectiveGlobalMemoryDir = Get-EffectiveGlobalMemoryDir $effectiveCodexDir
   $effectiveRepoRoot = $null
   if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) {
@@ -781,15 +868,30 @@ function Invoke-Import {
     New-Item -ItemType Directory -Force -Path $effectiveGlobalMemoryDir | Out-Null
   }
 
-  Copy-KitFile (Join-KitPath -Parts @($effectiveInputDir, "global", ".codex", "memories", "global-collaboration-rules.md")) `
+  $archiveMemoryDir = Join-KitPath -Parts @($effectiveInputDir, "global", "memories")
+  if (-not (Test-Path -LiteralPath $archiveMemoryDir -PathType Container)) {
+    $archiveMemoryDir = Join-KitPath -Parts @($effectiveInputDir, "global", ".codex", "memories")
+  }
+  foreach ($file in @("global-collaboration-rules.md", "memory-architecture.md")) {
+    if (-not (Test-Path -LiteralPath (Join-Path $archiveMemoryDir $file) -PathType Leaf)) {
+      throw "Incomplete global memory archive: $effectiveInputDir"
+    }
+  }
+
+  Copy-KitFile (Join-Path $archiveMemoryDir "global-collaboration-rules.md") `
     (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "global-collaboration-rules.md")) `
     "IMPORT"
-  Copy-KitFile (Join-KitPath -Parts @($effectiveInputDir, "global", ".codex", "memories", "memory-architecture.md")) `
+  Copy-KitFile (Join-Path $archiveMemoryDir "memory-architecture.md") `
     (Join-KitPath -Parts @($effectiveGlobalMemoryDir, "memory-architecture.md")) `
     "IMPORT"
   Copy-KitFile (Join-KitPath -Parts @($effectiveInputDir, "global", "AGENTS.md")) `
     (Join-KitPath -Parts @($effectiveHome, "AGENTS.md")) `
     "IMPORT"
+  foreach ($kind in @("codex", "dsh")) {
+    if ($Agent -ne $kind -and $Agent -ne "all") { continue }
+    $agentDir = if ($kind -eq "codex") { $effectiveCodexDir } else { $effectiveDshDir }
+    Copy-KitFile (Join-KitPath -Parts @($effectiveInputDir, "global", "agents", $kind, "AGENTS.md")) (Join-Path $agentDir "AGENTS.md") "IMPORT"
+  }
 
   if ($null -ne $effectiveRepoRoot) {
     if (-not $DryRun) {
@@ -813,6 +915,10 @@ function Invoke-Import {
     Copy-KitTree (Join-KitPath -Parts @($effectiveInputDir, "project", "memory")) `
       (Join-KitPath -Parts @($effectiveRepoRoot, "memory")) `
       "IMPORT"
+    if ($Agent -eq "antigravity" -or $Agent -eq "all") {
+      Copy-KitFile (Join-KitPath -Parts @($effectiveInputDir, "project", ".gemini", "rules", "antigravity-memory-adapter.md")) `
+        (Join-KitPath -Parts @($effectiveRepoRoot, ".gemini", "rules", "antigravity-memory-adapter.md")) "IMPORT"
+    }
   }
 }
 

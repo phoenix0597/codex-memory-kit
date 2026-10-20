@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+
 usage() {
   cat <<'EOF' >&2
-Использование: import-memory.sh --input-dir <path> --home <path> [--repo <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
+Использование: import-memory.sh --input-dir <path> --home <path> [--repo <path>] [--agent <codex|dsh|antigravity|all|none>] [--dsh-dir <path>] [--codex-dir <path>] [--global-memory-dir <path>] [--force] [--verbose]
 EOF
 }
 
@@ -11,6 +13,8 @@ INPUT_DIR=
 HOME_DIR=
 REPO_ROOT=
 CODEX_DIR=
+DSH_DIR=
+AGENT=codex
 GLOBAL_MEMORY_DIR=
 FORCE=0
 VERBOSE=0
@@ -27,6 +31,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --repo)
       REPO_ROOT=${2:-}
+      shift 2
+      ;;
+    --dsh-dir)
+      DSH_DIR=${2:-}
+      shift 2
+      ;;
+    --agent)
+      AGENT=${2:-}
       shift 2
       ;;
     --codex-dir)
@@ -57,8 +69,8 @@ if [ -z "$INPUT_DIR" ] || [ -z "$HOME_DIR" ]; then
   exit 2
 fi
 
-CODEX_DIR=${CODEX_DIR:-"$HOME_DIR/.codex"}
-GLOBAL_MEMORY_DIR=${GLOBAL_MEMORY_DIR:-"$CODEX_DIR/memories"}
+. "$SCRIPT_DIR/lib-memory.sh"
+resolve_memory_paths
 
 log() {
   if [ "$VERBOSE" -eq 1 ]; then
@@ -96,8 +108,8 @@ copy_tree() {
     return
   fi
   mkdir -p "$(dirname "$dst")"
-  rm -rf "$dst"
-  cp -R "$src" "$dst"
+  mkdir -p "$dst"
+  cp -R "$src/." "$dst"
   if [ "$FORCE" -eq 1 ] && [ -e "$dst" ]; then
     printf 'OVERWRITE %s\n' "$dst"
   else
@@ -106,13 +118,26 @@ copy_tree() {
 }
 
 log "Импорт памяти: $INPUT_DIR"
-mkdir -p "$GLOBAL_MEMORY_DIR"
 
-copy_file "$INPUT_DIR/global/.codex/memories/global-collaboration-rules.md" \
+ARCHIVE_MEMORY_DIR="$INPUT_DIR/global/memories"
+if [ ! -d "$ARCHIVE_MEMORY_DIR" ]; then
+  ARCHIVE_MEMORY_DIR="$INPUT_DIR/global/.codex/memories"
+fi
+if [ ! -f "$ARCHIVE_MEMORY_DIR/global-collaboration-rules.md" ] || [ ! -f "$ARCHIVE_MEMORY_DIR/memory-architecture.md" ]; then
+  printf 'Incomplete global memory archive: %s\n' "$INPUT_DIR" >&2
+  exit 2
+fi
+copy_file "$ARCHIVE_MEMORY_DIR/global-collaboration-rules.md" \
   "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
-copy_file "$INPUT_DIR/global/.codex/memories/memory-architecture.md" \
+copy_file "$ARCHIVE_MEMORY_DIR/memory-architecture.md" \
   "$GLOBAL_MEMORY_DIR/memory-architecture.md"
 copy_file "$INPUT_DIR/global/AGENTS.md" "$HOME_DIR/AGENTS.md"
+if [ "$AGENT" = codex ] || [ "$AGENT" = all ]; then
+  copy_file "$INPUT_DIR/global/agents/codex/AGENTS.md" "$CODEX_DIR/AGENTS.md"
+fi
+if [ "$AGENT" = dsh ] || [ "$AGENT" = all ]; then
+  copy_file "$INPUT_DIR/global/agents/dsh/AGENTS.md" "$DSH_DIR/AGENTS.md"
+fi
 
 if [ -n "$REPO_ROOT" ]; then
   mkdir -p "$REPO_ROOT"
@@ -123,4 +148,8 @@ if [ -n "$REPO_ROOT" ]; then
     "$REPO_ROOT/technical-specification-mvp.md"
   copy_file "$INPUT_DIR/project/article-notes.md" "$REPO_ROOT/article-notes.md"
   copy_tree "$INPUT_DIR/project/memory" "$REPO_ROOT/memory"
+  if [ "$AGENT" = antigravity ] || [ "$AGENT" = all ]; then
+    copy_file "$INPUT_DIR/project/.gemini/rules/antigravity-memory-adapter.md" \
+      "$REPO_ROOT/.gemini/rules/antigravity-memory-adapter.md"
+  fi
 fi
