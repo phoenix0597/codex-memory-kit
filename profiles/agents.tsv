@@ -1,0 +1,7 @@
+agent	scope	root	file	template	activation
+codex	global	CODEX_DIR	AGENTS.md	templates/agent/AGENTS.md.template	global
+dsh	global	DSH_DIR	AGENTS.md	templates/agent/AGENTS.md.template	global
+mimocode	global	MIMOCODE_CONFIG_DIR	AGENTS.md	templates/agent/AGENTS.md.template	global
+zcode	global	ZCODE_DIR	AGENTS.md	templates/agent/AGENTS.md.template	global
+antigravity	global	ANTIGRAVITY_DIR	GEMINI.md	templates/agent/AGENTS.md.template	global
+antigravity	project	REPO_ROOT	.agents/rules/antigravity-memory-adapter.md	templates/agent/antigravity-rule.md.template	always_on

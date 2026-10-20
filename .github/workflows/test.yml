@@ -1,0 +1,67 @@
+name: Memory kit tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: memory-kit-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: ${{ matrix.os }} / ${{ matrix.backend }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            backend: bash
+            shell: bash
+          - os: ubuntu-latest
+            backend: pwsh
+            shell: pwsh
+          - os: macos-latest
+            backend: bash
+            shell: bash
+          - os: macos-latest
+            backend: pwsh
+            shell: pwsh
+          - os: windows-latest
+            backend: bash
+            shell: bash
+          - os: windows-latest
+            backend: powershell
+            shell: powershell
+          - os: windows-latest
+            backend: pwsh
+            shell: pwsh
+    env:
+      MEMORY_KIT_TEST_BACKENDS: ${{ matrix.backend }}
+      MEMORY_KIT_TEST_INTEROP: ${{ matrix.backend == 'pwsh' && '1' || '0' }}
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Use macOS system Bash
+        if: runner.os == 'macOS' && matrix.backend == 'bash'
+        shell: bash
+        run: printf '%s\n' /bin >> "$GITHUB_PATH"
+      - name: Run repository and integration tests
+        run: python -m unittest discover -s tests -v

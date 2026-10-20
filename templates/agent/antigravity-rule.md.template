@@ -1,0 +1,12 @@
+---
+trigger: always_on
+description: Read shared collaboration rules and project memory before substantive work.
+---
+
+<!-- memory-kit:begin -->
+## Общая Файловая Память
+
+Перед работой прочитай `~/.agents/memory-kit.conf` из домашнего каталога текущего пользователя как обычные UTF-8 данные `KEY=value`; не выполняй этот файл как код. По `GLOBAL_MEMORY_DIR` явно прочитай `global-collaboration-rules.md` и `memory-architecture.md`, затем проектные `AGENTS.md` и `START-HERE.md`. Применяй общие правила и только протокол Antigravity. Используй внешние файлы напрямую, без inline include содержимого в правила.
+
+Если указатель или память недоступны, сообщи об этом. Не создавай отдельные копии правил и не расширяй права. Политики среды и границы задания сохраняются.
+<!-- memory-kit:end -->
