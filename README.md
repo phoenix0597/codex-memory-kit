@@ -100,7 +100,7 @@ cd codex-memory-kit
 
 Подходят Windows PowerShell 5.1 и PowerShell 7+. **Первый блок выполняется из папки скачанного набора.**
 
-Если Windows сообщает «не имеет цифровой подписи», см. [как разрешить запуск одной команды](docs/configuration.md#powershell-блокирует-запуск).
+Если Windows сообщает «не имеет цифровой подписи», используйте [готовые команды ниже](#если-windows-требует-цифровую-подпись).
 
 ```powershell
 # dsh — пример; укажите своего агента.
@@ -126,6 +126,37 @@ $memoryKit = (Get-Location).Path
 
 # Проверить общую память и файлы этого проекта.
 & "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -Strict
+```
+
+#### Если Windows требует цифровую подпись
+
+Для доверенной копии набора выполните эти два блока вместо обычных команд PowerShell. `Bypass` действует только для каждого отдельного запуска; постоянная политика не меняется.
+
+**Из папки скачанного набора:**
+
+```powershell
+# dsh — пример; укажите своего агента.
+$memoryKit = (Get-Location).Path
+
+# Показать план установки, не изменяя файлы.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memory-kit.ps1" install -Agent dsh -DryRun
+
+# Создать общие файлы и инструкцию подключения для выбранного агента.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memory-kit.ps1" install -Agent dsh
+
+# Проверить общие файлы и подключение выбранного агента.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -Mode global -Strict
+```
+
+**Затем в том же терминале перейдите в корень нового проекта и выполните:**
+
+```powershell
+# dsh — пример; укажите своего агента.
+# Создать файлы памяти в текущем проекте.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memory-kit.ps1" init-project -Agent dsh
+
+# Проверить общую память и файлы этого проекта.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -Strict
 ```
 
 ### Bash
