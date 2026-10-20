@@ -70,6 +70,7 @@ flowchart LR
 | MiMoCode | `mimocode` | `~/.config/mimocode/AGENTS.md` |
 | ZCode | `zcode` | `~/.zcode/AGENTS.md` |
 | Antigravity | `antigravity` | `~/.gemini/GEMINI.md` |
+| Все пять агентов | `all` | Во все перечисленные выше файлы; общая память остаётся единой |
 
 Для Antigravity `init-project` также добавляет файл `.agents/rules/antigravity-memory-adapter.md` в проект. Его создаёт команда, вручную готовить его не нужно.
 
