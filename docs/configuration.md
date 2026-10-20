@@ -24,6 +24,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\memory-kit.ps1
 
 Подробнее: [политики выполнения PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies) и [Unblock-File](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/unblock-file).
 
+## Git Bash: signal pipe, Win32 error 5
+
+В ограниченной среде Windows Git Bash может завершиться с `signal pipe` и `Win32 error 5` ещё до выполнения команды набора. Такой сбой наблюдался в песочнице DSH; сам текст ошибки не устанавливает причину отказа доступа.
+
+Для установки используйте [команды PowerShell из README](../README.md#powershell), при необходимости — [полную последовательность с временным Bypass](../README.md#если-windows-требует-цифровую-подпись). `Bypass` относится только к политике выполнения PowerShell и не обходит песочницу.
+
+Если нужен именно Bash, проверьте его доступность в разрешённой среде и сообщите точную ошибку. Не меняйте ACL, `safe.directory` или настройки песочницы по одному этому сообщению.
+
 ## Каталоги и выбор агента
 
 `-Agent` / `--agent` выбирает, для какой программы подготовить инструкцию подключения. Помимо пяти имён агентов доступны `all` — все пять, и `none` — общие файлы и проектный каркас без инструкций подключения для агентов. По умолчанию выбирается `codex`.

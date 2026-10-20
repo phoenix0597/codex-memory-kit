@@ -163,6 +163,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$memoryKit\scripts\memo
 
 Подходят Linux, macOS, WSL и Git Bash; используются стандартные утилиты `sed`, `awk`, `grep`, `find` и `cp`. **Первый блок выполняется из папки скачанного набора.**
 
+При ошибке Git Bash `signal pipe, Win32 error 5` в Windows используйте команды PowerShell выше; [подробнее о диагностике](docs/configuration.md#git-bash-signal-pipe-win32-error-5).
+
 ```bash
 # dsh — пример; укажите своего агента.
 # Запомнить расположение набора для дальнейших команд.
