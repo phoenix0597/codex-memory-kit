@@ -12,7 +12,7 @@ param(
   [string]$SourceRoot, [string]$InputDir, [string]$OutputDir,
   [ValidateSet('global', 'project', 'all')][string]$Mode = 'all',
   [switch]$Strict, [switch]$Force, [switch]$DryRun, [switch]$UpdateAdapters,
-  [switch]$VerboseLog, [switch]$NoHomeAgents
+  [switch]$VerboseLog
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -252,7 +252,6 @@ function Plan-Install {
     Add-Text (Join-Path $MemoryDir $file) (Render-Text ('templates/global/' + $file)) -Replace:$Force
   }
   Add-Locator
-  if (-not $NoHomeAgents) { Add-Adapter (Join-Path $TargetHome 'AGENTS.md') 'templates/home/AGENTS.md.template' }
   foreach ($record in @(Get-Records 'global')) { Add-Adapter (Get-RecordPath $record) $record.template }
 }
 function Plan-Project {
@@ -313,7 +312,6 @@ function Invoke-Check {
     }
   }
   if ($Mode -eq 'global' -or $Mode -eq 'all') {
-    if (-not $NoHomeAgents) { Check-Adapter (Join-Path $TargetHome 'AGENTS.md') 'global' 'none' }
     foreach ($record in @(Get-Records 'global')) { Check-Adapter (Get-RecordPath $record) $record.activation $record.agent }
     if ($Agent -eq 'codex' -or $Agent -eq 'all') {
       $override = Join-Path $Roots.CODEX_DIR 'AGENTS.override.md'
@@ -337,7 +335,6 @@ function Plan-Export {
   foreach ($file in @('global-collaboration-rules.md', 'memory-architecture.md')) { if (-not (Test-Path -LiteralPath (Join-Path $MemoryDir $file) -PathType Leaf)) { throw "Missing canonical memory file: $file" } }
   Add-Tree $MemoryDir (Join-Relative $destination 'global/memories') -Required
   Add-Text (Join-Path $destination 'memory-kit-export.conf') ("VERSION=2`nAGENT=$Agent`n") -Replace:$Force
-  if (-not $NoHomeAgents) { Add-Copy (Join-Path $TargetHome 'AGENTS.md') (Join-Relative $destination 'global/AGENTS.md') }
   foreach ($record in @(Get-Records 'global')) { Add-Copy (Get-RecordPath $record) (Join-Relative $destination ('global/agents/' + $record.agent + '/' + $record.file)) }
   if ($TargetRepo) {
     foreach ($file in @('AGENTS.md', 'START-HERE.md', 'assistant-memory.md')) { Add-Copy (Join-Path $TargetRepo $file) (Join-Relative $destination ('project/' + $file)) -Required }
@@ -361,7 +358,6 @@ function Plan-Import {
   foreach ($file in @('global-collaboration-rules.md', 'memory-architecture.md')) { if (-not (Test-Path -LiteralPath (Join-Path $memory $file) -PathType Leaf)) { throw "Incomplete global memory archive: $archive" } }
   Add-Tree $memory $MemoryDir -Required
   Add-Locator
-  if (-not $NoHomeAgents) { Add-Adapter (Join-Path $TargetHome 'AGENTS.md') 'templates/home/AGENTS.md.template' (Join-Relative $archive 'global/AGENTS.md') }
   foreach ($record in @(Get-Records 'global')) { Add-Adapter (Get-RecordPath $record) $record.template (Join-Relative $archive ('global/agents/' + $record.agent + '/' + $record.file)) }
   if ($TargetRepo) {
     foreach ($file in @('AGENTS.md', 'START-HERE.md', 'assistant-memory.md', 'technical-specification-mvp.md', 'article-notes.md')) { Add-Copy (Join-Relative $archive ('project/' + $file)) (Join-Path $TargetRepo $file) }

@@ -49,7 +49,7 @@ git clone https://github.com/phoenix0597/codex-memory-kit.git
 cd codex-memory-kit
 ```
 
-Выберите **одну** оболочку. В примерах подключается DSH; замените `dsh` нужным [профилем](#выбор-агента). `NoHomeAgents` отключает необязательный домашний индекс `~/AGENTS.md`.
+Выберите **одну** оболочку. В примерах подключается DSH; замените `dsh` нужным [профилем](#выбор-агента).
 
 ### PowerShell
 
@@ -60,16 +60,16 @@ cd codex-memory-kit
 $memoryKit = (Get-Location).Path
 
 # Сначала посмотреть изменения, затем установить общую память и адаптер.
-.\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents -DryRun
-.\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents
-.\scripts\memory-kit.ps1 check -Agent dsh -NoHomeAgents -Mode global -Strict
+.\scripts\memory-kit.ps1 install -Agent dsh -DryRun
+.\scripts\memory-kit.ps1 install -Agent dsh
+.\scripts\memory-kit.ps1 check -Agent dsh -Mode global -Strict
 ```
 
 Чтобы создать память проекта, в том же терминале перейдите в корень нового проекта. Затем выполните:
 
 ```powershell
 & "$memoryKit\scripts\memory-kit.ps1" init-project -Agent dsh
-& "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -NoHomeAgents -Strict
+& "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -Strict
 ```
 
 ### Bash
@@ -80,16 +80,16 @@ $memoryKit = (Get-Location).Path
 # Сохранить путь к набору, пока вы находитесь в его каталоге.
 memory_kit=$(pwd -P)
 
-./scripts/install.sh --agent dsh --no-home-agents --dry-run
-./scripts/install.sh --agent dsh --no-home-agents
-./scripts/check.sh --agent dsh --no-home-agents --mode global --strict
+./scripts/install.sh --agent dsh --dry-run
+./scripts/install.sh --agent dsh
+./scripts/check.sh --agent dsh --mode global --strict
 ```
 
 Чтобы создать память проекта, в том же терминале перейдите в корень нового проекта. Затем выполните:
 
 ```bash
 "$memory_kit/scripts/init-project.sh" --agent dsh
-"$memory_kit/scripts/check.sh" --agent dsh --no-home-agents --strict
+"$memory_kit/scripts/check.sh" --agent dsh --strict
 ```
 
 В Git Bash используйте пути вида `/c/path/to/project`, в PowerShell — `C:\path\to\project`. Пути с пробелами заключайте в кавычки. Python требуется для тестов, а не для установки.
@@ -112,7 +112,7 @@ memory_kit=$(pwd -P)
 | `all` | Все пять файлов выше | Подключает все пять агентов к общей памяти |
 | `none` | Без глобальных адаптеров | Только общая память и обычный проектный каркас |
 
-`init-project` создаёт общие проектные файлы; для `antigravity` и `all` добавляет проектный rule. Команда не устанавливает глобальные адаптеры. `~/AGENTS.md` — дополнительный индекс совместимости, а не замена штатного глобального файла агента.
+`init-project` создаёт общие проектные файлы; для `antigravity` и `all` добавляет проектный rule. Команда не устанавливает глобальные адаптеры. Для глобального подключения используются штатные файлы профилей из таблицы. Набор не создаёт и не обслуживает домашний `~/AGENTS.md`; существующий пользовательский файл остаётся без изменений.
 
 Нестандартные каталоги задаются отдельно: `-CodexDir`, `-DshDir`, `-MimocodeConfigDir`, `-ZcodeDir`, `-AntigravityDir` или Bash-флагами `--codex-dir`, `--dsh-dir`, `--mimocode-config-dir`, `--zcode-dir`, `--antigravity-dir`. Передавайте каталог, который читает **ваш фактический профиль**; установщик не меняет настройки самого харнесса.
 
@@ -150,11 +150,11 @@ KIT_ROOT=/absolute/path/to/codex-memory-kit
 Чтобы выбрать произвольный каталог при установке:
 
 ```powershell
-.\scripts\memory-kit.ps1 install -Agent dsh -GlobalMemoryDir "D:\Общая память" -NoHomeAgents
+.\scripts\memory-kit.ps1 install -Agent dsh -GlobalMemoryDir "D:\Общая память"
 ```
 
 ```bash
-./scripts/install.sh --agent dsh --global-memory-dir "$HOME/Общая память" --no-home-agents
+./scripts/install.sh --agent dsh --global-memory-dir "$HOME/Общая память"
 ```
 
 Последующие команды используют сохранённый выбор. Явный `GlobalMemoryDir` имеет приоритет: `install` сохраняет этот выбор в локаторе, но не переносит содержимое прежнего каталога. `check` с другим явным источником сообщает несовпадение. Без локатора явный `CodexDir` сохраняет исторический выбор `<CodexDir>/memories`; иначе обнаруживается старая память в `~/.codex/memories`. Если старый и нейтральный каталоги конкурируют, выберите источник явно. Название `.codex` не ограничивает круг читателей существующей памяти.
@@ -168,13 +168,13 @@ KIT_ROOT=/absolute/path/to/codex-memory-kit
 Установщик сохраняет существующие канонические файлы по умолчанию. В штатный файл инструкций агента добавляется ограниченный маркерами блок kit; пользовательский текст вокруг него сохраняется. Совпадающий блок не дублируется. Для обновления отличающегося блока используйте `-UpdateAdapters` / `--update-adapters`: этот режим обновляет управляемые блоки и сохраняет существующие содержательные файлы памяти.
 
 ```powershell
-.\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents -UpdateAdapters -DryRun
-.\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents -UpdateAdapters
+.\scripts\memory-kit.ps1 install -Agent dsh -UpdateAdapters -DryRun
+.\scripts\memory-kit.ps1 install -Agent dsh -UpdateAdapters
 ```
 
 ```bash
-./scripts/install.sh --agent dsh --no-home-agents --update-adapters --dry-run
-./scripts/install.sh --agent dsh --no-home-agents --update-adapters
+./scripts/install.sh --agent dsh --update-adapters --dry-run
+./scripts/install.sh --agent dsh --update-adapters
 ```
 
 `Force` / `--force` разрешает более широкую замену, включая существующие канонические файлы при установке, проектные файлы при инициализации и совпадающие файлы при импорте. Используйте его только после проверки полного списка замен и diff. Для обычного обновления указателей достаточно `UpdateAdapters`.

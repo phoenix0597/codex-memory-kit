@@ -13,7 +13,7 @@ Usage: memory-kit.sh <install|init-project|check|export|import> [options]
   --codex-dir PATH --dsh-dir PATH --mimocode-config-dir PATH
   --zcode-dir PATH --antigravity-dir PATH --source-root PATH
   --input-dir PATH --output-dir PATH --mode global|project|all
-  --strict --force --update-adapters --dry-run --verbose --no-home-agents
+  --strict --force --update-adapters --dry-run --verbose
 EOF
 }
 
@@ -24,7 +24,7 @@ HOME_DIR=${HOME:-${USERPROFILE:-}}; HOME_EXPLICIT=0
 NATIVE_MIMO_CONFIG=${MIMOCODE_CONFIG_DIR:-}
 CODEX_DIR=; DSH_DIR=; MIMOCODE_CONFIG_DIR=; ZCODE_DIR=; ANTIGRAVITY_DIR=
 AGENT=codex; GLOBAL_MEMORY_DIR=; SOURCE_ROOT=$RUNTIME_ROOT; REPO_ROOT=; PROJECT_NAME=
-INPUT_DIR=; OUTPUT_DIR=; MODE=all; STRICT=0; FORCE=0; UPDATE_ADAPTERS=0; DRY_RUN=0; VERBOSE=0; INSTALL_HOME_AGENTS=1
+INPUT_DIR=; OUTPUT_DIR=; MODE=all; STRICT=0; FORCE=0; UPDATE_ADAPTERS=0; DRY_RUN=0; VERBOSE=0
 TODAY=$(date +%F); BEGIN='<!-- memory-kit:begin -->'; END='<!-- memory-kit:end -->'
 PLAN_TYPES=(); PLAN_SOURCES=(); PLAN_DESTINATIONS=(); PLAN_CONTENTS=(); PLAN_VERBS=()
 ACTIVE_TEMP=
@@ -32,7 +32,7 @@ trap 'if [ -n "$ACTIVE_TEMP" ]; then rm -f -- "$ACTIVE_TEMP"; fi' EXIT
 while [ "$#" -gt 0 ]; do
   flag=$1; shift
   case "$flag" in
-    --strict) STRICT=1 ;; --force) FORCE=1 ;; --update-adapters) UPDATE_ADAPTERS=1 ;; --dry-run) DRY_RUN=1 ;; --verbose) VERBOSE=1 ;; --no-home-agents) INSTALL_HOME_AGENTS=0 ;;
+    --strict) STRICT=1 ;; --force) FORCE=1 ;; --update-adapters) UPDATE_ADAPTERS=1 ;; --dry-run) DRY_RUN=1 ;; --verbose) VERBOSE=1 ;;
     --help|-h) usage; exit 0 ;;
     --home|--repo|--project-name|--codex-dir|--dsh-dir|--mimocode-config-dir|--zcode-dir|--antigravity-dir|--global-memory-dir|--source-root|--input-dir|--output-dir|--mode|--agent)
       [ "$#" -gt 0 ] && [ -n "$1" ] || fail "Missing value for $flag"
@@ -76,7 +76,6 @@ install_memory() {
   plan_template "$SOURCE_ROOT/templates/global/global-collaboration-rules.md" "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md"
   plan_template "$SOURCE_ROOT/templates/global/memory-architecture.md" "$GLOBAL_MEMORY_DIR/memory-architecture.md"
   plan_profile_adapters global
-  if [ "$INSTALL_HOME_AGENTS" -eq 1 ]; then plan_adapter "$SOURCE_ROOT/templates/home/AGENTS.md.template" "$HOME_DIR/AGENTS.md"; fi
   plan_locator
 }
 
@@ -149,7 +148,6 @@ check_memory() {
       if [ "$STRICT" -eq 1 ]; then require_no_placeholders "$GLOBAL_MEMORY_DIR/$file"; fi
     done
     check_profiles global
-    if [ "$INSTALL_HOME_AGENTS" -eq 1 ]; then check_adapter "$HOME_DIR/AGENTS.md" global global; fi
     if selected_agent codex && [ -s "$CODEX_DIR/AGENTS.override.md" ]; then check_fail "$CODEX_DIR/AGENTS.override.md" 'override hides the Codex bootstrap'; fi
   fi
   if [ "$MODE" != global ]; then
@@ -176,7 +174,6 @@ export_memory() {
   [ -f "$GLOBAL_MEMORY_DIR/global-collaboration-rules.md" ] && [ -f "$GLOBAL_MEMORY_DIR/memory-architecture.md" ] || fail 'Incomplete global memory source'
   case "$OUTPUT_DIR/" in "$GLOBAL_MEMORY_DIR/"*) fail 'Archive output must be outside global memory' ;; esac
   plan_tree "$GLOBAL_MEMORY_DIR" "$OUTPUT_DIR/global/memories"
-  if [ "$INSTALL_HOME_AGENTS" -eq 1 ] && [ -f "$HOME_DIR/AGENTS.md" ]; then plan_copy "$HOME_DIR/AGENTS.md" "$OUTPUT_DIR/global/AGENTS.md"; fi
   for ((i=0; i<${#PROFILE_AGENTS[@]}; i++)); do
     selected_agent "${PROFILE_AGENTS[$i]}" || continue
     root=${PROFILE_ROOTS[$i]}; file=${PROFILE_FILES[$i]}
@@ -218,7 +215,6 @@ import_memory() {
   [ -f "$archive_memory/global-collaboration-rules.md" ] && [ -f "$archive_memory/memory-architecture.md" ] || fail "Incomplete global memory archive: $INPUT_DIR"
   plan_tree "$archive_memory" "$GLOBAL_MEMORY_DIR"
   plan_profile_adapters global "$INPUT_DIR"
-  if [ "$INSTALL_HOME_AGENTS" -eq 1 ]; then plan_adapter "$SOURCE_ROOT/templates/home/AGENTS.md.template" "$HOME_DIR/AGENTS.md" "$INPUT_DIR/global/AGENTS.md"; fi
   if [ -n "$REPO_ROOT" ]; then
     for file in AGENTS.md START-HERE.md assistant-memory.md technical-specification-mvp.md article-notes.md; do if [ -f "$INPUT_DIR/project/$file" ]; then plan_copy "$INPUT_DIR/project/$file" "$REPO_ROOT/$file"; fi; done
     if [ -d "$INPUT_DIR/project/memory" ]; then plan_tree "$INPUT_DIR/project/memory" "$REPO_ROOT/memory"; fi

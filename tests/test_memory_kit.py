@@ -135,9 +135,9 @@ class MemoryKitTests:
         self.assertIn("KIT_ROOT=", content)
 
     def test_new_dsh_install_and_project(self):
-        self.run_kit("install", no_home_agents=True)
+        self.run_kit("install")
         self.run_kit("init-project", project_name="DSH & Codex | проект")
-        self.check(no_home_agents=True)
+        self.check()
         self.assertTrue((self.shared / "memory-architecture.md").is_file())
         self.assertTrue((self.home / ".dsh/AGENTS.md").is_file())
         self.assertFalse((self.home / "AGENTS.md").exists())
@@ -152,9 +152,9 @@ class MemoryKitTests:
                 home = self.base / (agent + " home")
                 repo = self.base / (agent + " project")
                 repo.mkdir()
-                self.run_kit("install", home=home, agent=agent, no_home_agents=True)
+                self.run_kit("install", home=home, agent=agent)
                 self.run_kit("init-project", home=home, repo=repo, agent=agent)
-                self.check(home=home, repo=repo, agent=agent, no_home_agents=True)
+                self.check(home=home, repo=repo, agent=agent)
                 self.assertTrue((home / relative).is_file())
                 self.assertIn("memory-kit.conf", text(home / relative))
                 self.assert_locator(home=home)
@@ -231,7 +231,7 @@ class MemoryKitTests:
 
     def test_native_bootstraps_append_and_keep_user_text_idempotently(self):
         custom = "# User instructions\nKeep this custom rule: café & кириллица.\n"
-        paths = [self.home / relative for relative in ENTRYPOINTS.values()] + [self.home / "AGENTS.md"]
+        paths = [self.home / relative for relative in ENTRYPOINTS.values()]
         for path in paths:
             put(path, custom)
         self.run_kit("install", agent="all")
@@ -247,27 +247,93 @@ class MemoryKitTests:
         self.assertEqual(before, snapshot(self.home))
         self.check(mode="global", agent="all")
 
+    def test_existing_home_agents_is_untouched_by_every_memory_operation(self):
+        home_agents = self.home / "AGENTS.md"
+        user_bytes = b"\xef\xbb\xbf# User-owned home instructions\r\n" + "Правило пользователя сохраняется побайтно.\r\n".encode("utf-8") + b"{{USER_PLACEHOLDER}}\r\n<!-- memory-kit:begin -->\r\n"
+        home_agents.write_bytes(user_bytes)
+        operations = (
+            ("install", dict(agent="all")),
+            ("init-project", dict(agent="all")),
+            ("check", dict(agent="all", repo=self.repo, strict=True)),
+            ("install", dict(agent="all", force=True)),
+            ("init-project", dict(agent="all", force=True)),
+            ("install", dict(agent="all", update_adapters=True)),
+            ("init-project", dict(agent="all", update_adapters=True)),
+        )
+        for command, options in operations:
+            with self.subTest(command=command, options=options):
+                self.run_kit(command, **options)
+                self.assertEqual(home_agents.read_bytes(), user_bytes)
+        archive = self.base / "home-independent archive"
+        self.run_kit("export", agent="all", repo=self.repo, output_dir=archive)
+        self.run_kit("export", agent="all", repo=self.repo, output_dir=archive, force=True)
+        self.assertEqual(home_agents.read_bytes(), user_bytes)
+        self.assertFalse((archive / "global/AGENTS.md").exists())
+        put(archive / "global/AGENTS.md", "Archived home instructions must be ignored.\n")
+        destination = self.base / "existing-home-file import"
+        destination_agents = destination / "AGENTS.md"
+        destination_bytes = b"# Destination home instructions\r\nDo not replace this user file.\r\n"
+        destination_agents.parent.mkdir()
+        destination_agents.write_bytes(destination_bytes)
+        repo = self.base / "existing-home-file project"
+        for options in ({}, {"force": True}, {"update_adapters": True}):
+            with self.subTest(import_options=options):
+                self.run_kit("import", home=destination, repo=repo, agent="all", input_dir=archive, **options)
+                self.assertEqual(destination_agents.read_bytes(), destination_bytes)
+                self.assertEqual(home_agents.read_bytes(), user_bytes)
+                self.check(home=destination, repo=repo, agent="all")
+        for relative in ENTRYPOINTS.values():
+            self.assertTrue((destination / relative).is_file())
+        self.assertTrue((repo / "AGENTS.md").is_file())
+
+    def test_fresh_homes_never_receive_agents_from_install_or_old_archives(self):
+        self.run_kit("install", agent="all")
+        self.run_kit("init-project", agent="all")
+        self.check(agent="all")
+        self.assertFalse((self.home / "AGENTS.md").exists())
+        archive = self.base / "archive with obsolete home index"
+        self.run_kit("export", agent="all", repo=self.repo, output_dir=archive)
+        self.assertFalse((archive / "global/AGENTS.md").exists())
+        put(archive / "global/AGENTS.md", "# Obsolete kit home index\n{{OLD_HOME_PATH}}\n")
+        for version in ("v2", "legacy"):
+            with self.subTest(archive_version=version):
+                if version == "legacy":
+                    (archive / "memory-kit-export.conf").unlink()
+                destination = self.base / (version + " fresh import home")
+                repo = self.base / (version + " fresh import project")
+                self.run_kit("import", home=destination, repo=repo, agent="all", input_dir=archive, force=True, update_adapters=True)
+                self.assertFalse((destination / "AGENTS.md").exists())
+                self.check(home=destination, repo=repo, agent="all")
+                for relative in ENTRYPOINTS.values():
+                    self.assertTrue((destination / relative).is_file())
+                self.assertTrue((repo / "AGENTS.md").is_file())
+
+    def test_removed_home_index_flag_is_rejected_without_writes(self):
+        before = snapshot(self.base)
+        self.run_kit("install", no_home_agents=True, expect=None)
+        self.assertEqual(before, snapshot(self.base))
+
     def test_force_replaces_only_native_managed_block(self):
-        self.run_kit("install", no_home_agents=True)
+        self.run_kit("install")
         path = self.home / ".dsh/AGENTS.md"
         original = text(path)
         user_prefix = "# User header\nKeep user's configuration.\n"
         user_suffix = "\n# User footer\nKeep this trailing note.\n"
         put(path, user_prefix + original.replace("memory-kit.conf", "stale-memory.conf") + user_suffix)
         before = snapshot(self.home)
-        self.run_kit("install", no_home_agents=True, expect=None)
+        self.run_kit("install", expect=None)
         self.assertEqual(before, snapshot(self.home))
-        self.run_kit("install", no_home_agents=True, force=True)
+        self.run_kit("install", force=True)
         updated = text(path)
         self.assertTrue(updated.startswith(user_prefix))
         self.assertTrue(updated.endswith(user_suffix))
         self.assertIn("~/.agents/memory-kit.conf", updated)
         self.assertNotIn("stale-memory.conf", updated)
         self.assertEqual(updated.count(BEGIN), 1)
-        self.check(mode="global", no_home_agents=True)
+        self.check(mode="global")
 
     def test_update_adapters_keeps_custom_canonical_memory(self):
-        self.run_kit("install", no_home_agents=True)
+        self.run_kit("install")
         self.run_kit("init-project")
         rules = self.shared / "global-collaboration-rules.md"
         with rules.open("a", encoding="utf-8") as stream:
@@ -276,7 +342,7 @@ class MemoryKitTests:
         prefix, suffix = "# Existing user instructions\n", "\n# Existing user footer\n"
         put(path, prefix + text(path).replace("memory-kit.conf", "stale-memory.conf") + suffix)
         before = snapshot(self.shared), snapshot(self.repo), (self.home / LOCATOR).read_bytes()
-        self.run_kit("install", no_home_agents=True, update_adapters=True)
+        self.run_kit("install", update_adapters=True)
         self.assertEqual(before, (snapshot(self.shared), snapshot(self.repo), (self.home / LOCATOR).read_bytes()))
         updated = text(path)
         self.assertTrue(updated.startswith(prefix))
@@ -284,7 +350,7 @@ class MemoryKitTests:
         self.assertIn("~/.agents/memory-kit.conf", updated)
         self.assertNotIn("stale-memory.conf", updated)
         self.assertEqual(updated.count(BEGIN), 1)
-        self.check(no_home_agents=True)
+        self.check()
 
     def test_import_regenerates_antigravity_managed_rule_and_preserves_user_text(self):
         self.run_kit("install", agent="antigravity")
@@ -330,7 +396,7 @@ class MemoryKitTests:
         path = self.home / ".dsh/AGENTS.md"
         put(path, "# Custom rules\n" + BEGIN + "\nUnclosed managed block\n")
         before = snapshot(self.home)
-        self.run_kit("install", no_home_agents=True, expect=2)
+        self.run_kit("install", expect=2)
         self.assertEqual(before, snapshot(self.home))
 
     def test_dry_run_writes_nothing(self):
@@ -643,9 +709,9 @@ class MemoryKitTests:
                     "XDG_CONFIG_HOME": self.path_arg(xdg),
                 }
                 expected = explicit if selected_root == "config-dir" else mimo_home / "config" if selected_root == "mimocode-home" else xdg / "mimocode"
-                self.run_kit("install", home=None, agent="mimocode", global_memory_dir=memory, environment=environment, no_home_agents=True)
+                self.run_kit("install", home=None, agent="mimocode", global_memory_dir=memory, environment=environment)
                 self.assertTrue((expected / "AGENTS.md").is_file())
-                self.check(home=None, agent="mimocode", mode="global", global_memory_dir=memory, environment=environment, no_home_agents=True)
+                self.check(home=None, agent="mimocode", mode="global", global_memory_dir=memory, environment=environment)
                 self.assert_locator(home=home, memory=memory)
 
     def test_codex_and_dsh_environment_roots_without_home_flag(self):
@@ -659,10 +725,10 @@ class MemoryKitTests:
         }
         for agent, directory in (("codex", codex), ("dsh", dsh)):
             with self.subTest(agent=agent):
-                self.run_kit("install", home=None, agent=agent, global_memory_dir=self.shared, environment=environment, no_home_agents=True)
+                self.run_kit("install", home=None, agent=agent, global_memory_dir=self.shared, environment=environment)
                 self.assertTrue((directory / "AGENTS.md").is_file())
                 self.assertFalse((self.home / ENTRYPOINTS[agent]).exists())
-                self.check(home=None, agent=agent, mode="global", global_memory_dir=self.shared, environment=environment, no_home_agents=True)
+                self.check(home=None, agent=agent, mode="global", global_memory_dir=self.shared, environment=environment)
 
     def test_existing_codex_home_memory_is_kept_without_home_flag(self):
         codex = self.base / "runtime legacy codex root"
@@ -671,11 +737,11 @@ class MemoryKitTests:
         put(legacy / "memory-architecture.md", "Existing runtime architecture\n")
         before = snapshot(legacy)
         environment = {"HOME": self.path_arg(self.home), "USERPROFILE": str(self.home), "CODEX_HOME": self.path_arg(codex)}
-        self.run_kit("install", home=None, agent="codex", environment=environment, no_home_agents=True)
+        self.run_kit("install", home=None, agent="codex", environment=environment)
         self.assert_locator(memory=legacy)
         self.assertFalse(self.shared.exists())
         self.assertEqual(before, snapshot(legacy))
-        self.check(home=None, agent="codex", mode="global", environment=environment, no_home_agents=True)
+        self.check(home=None, agent="codex", mode="global", environment=environment)
 
     def test_antigravity_requires_active_rule_with_always_on_trigger(self):
         self.run_kit("install", agent="antigravity")
