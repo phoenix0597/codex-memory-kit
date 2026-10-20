@@ -67,7 +67,9 @@ def normalized_path(value):
         match = re.match(r"^/(?:mnt/)?([A-Za-z])(?:/|$)(.*)", value)
         if match:
             value = match[1] + ":/" + match[2]
-        value = value.casefold()
+        # TEMP may contain an 8.3 parent such as RUNNER~1, while a native
+        # runtime records its long name. Compare the actual filesystem path.
+        value = Path(value).resolve().as_posix().casefold()
     return value.rstrip("/")
 
 
@@ -744,6 +746,30 @@ class MemoryKitTests:
         locator = dict(line.split("=", 1) for line in text(destination / LOCATOR).splitlines() if "=" in line)
         self.assertEqual(normalized_path(locator["KIT_ROOT"]), normalized_path(str(ROOT)))
         self.check(home=destination, mode="global")
+
+
+class PathComparisonTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "Windows 8.3 path aliases are platform-specific")
+    def test_windows_short_alias_identifies_the_same_directory(self):
+        import ctypes
+
+        get_short_path = ctypes.windll.kernel32.GetShortPathNameW
+        get_short_path.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint]
+        get_short_path.restype = ctypes.c_uint
+        with tempfile.TemporaryDirectory(prefix="memory-kit-long-directory-name-") as directory:
+            long_path = str(Path(directory).resolve())
+            required = get_short_path(long_path, None, 0)
+            if not required:
+                raise ctypes.WinError()
+            buffer = ctypes.create_unicode_buffer(required)
+            if not get_short_path(long_path, buffer, required):
+                raise ctypes.WinError()
+            short_path = buffer.value
+            if short_path.casefold() == long_path.casefold():
+                self.skipTest("This volume does not expose a distinct 8.3 alias")
+            self.assertEqual(normalized_path(short_path), normalized_path(long_path))
+            msys_short_path = "/" + short_path[0].lower() + short_path[2:].replace("\\", "/")
+            self.assertEqual(normalized_path(msys_short_path), normalized_path(long_path))
 
 
 for name, runtime in BACKENDS.items():
