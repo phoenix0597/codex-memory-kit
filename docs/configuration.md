@@ -8,6 +8,22 @@
 
 Во всех примерах `dsh` выбран условно: замените его именем своего агента из [таблицы в README](../README.md#выбор-агента).
 
+## PowerShell блокирует запуск
+
+Скрипт набора не имеет цифровой подписи. Если PowerShell запрещает его выполнение, ошибка возникает до запуска скрипта — даже с `-DryRun`.
+
+Если вы доверяете скачанной копии набора, выполните из её папки:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\memory-kit.ps1 install -Agent dsh -DryRun
+```
+
+`Bypass` разрешает запуск только в этом дочернем процессе; постоянная политика не меняется. `-DryRun` показывает план без записи файлов. Для установки повторите команду без `-DryRun`; для других действий замените `install` и его параметры после пути к скрипту.
+
+Если файл помечен как скачанный из интернета, при политике `RemoteSigned` может быть достаточно `Unblock-File -LiteralPath .\scripts\memory-kit.ps1`. При `AllSigned` это не заменяет подпись. Политики организации (`MachinePolicy` / `UserPolicy`) имеют приоритет: проверить их можно командой `Get-ExecutionPolicy -List`.
+
+Подробнее: [политики выполнения PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies) и [Unblock-File](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/unblock-file).
+
 ## Каталоги и выбор агента
 
 `-Agent` / `--agent` выбирает, для какой программы подготовить инструкцию подключения. Помимо пяти имён агентов доступны `all` — все пять, и `none` — общие файлы и проектный каркас без инструкций подключения для агентов. По умолчанию выбирается `codex`.
