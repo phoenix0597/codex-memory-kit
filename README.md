@@ -56,14 +56,20 @@ cd codex-memory-kit
 Нужны Windows PowerShell 5.1 или PowerShell 7+.
 
 ```powershell
+# Сохранить путь к набору, пока вы находитесь в его каталоге.
+$memoryKit = (Get-Location).Path
+
 # Сначала посмотреть изменения, затем установить общую память и адаптер.
 .\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents -DryRun
 .\scripts\memory-kit.ps1 install -Agent dsh -NoHomeAgents
 .\scripts\memory-kit.ps1 check -Agent dsh -NoHomeAgents -Mode global -Strict
+```
 
-# Необязательно: создать память в новом проекте.
-.\scripts\memory-kit.ps1 init-project -Repo C:\path\to\new-project -Agent dsh
-.\scripts\memory-kit.ps1 check -Repo C:\path\to\new-project -Agent dsh -NoHomeAgents -Strict
+Чтобы создать память проекта, в том же терминале перейдите в корень нового проекта. Затем выполните:
+
+```powershell
+& "$memoryKit\scripts\memory-kit.ps1" init-project -Agent dsh
+& "$memoryKit\scripts\memory-kit.ps1" check -Agent dsh -NoHomeAgents -Strict
 ```
 
 ### Bash
@@ -71,16 +77,24 @@ cd codex-memory-kit
 Подходят Linux, macOS, WSL и Git Bash; нужны Bash и стандартные POSIX-утилиты, включая `sed`, `awk`, `grep`, `find` и `cp`.
 
 ```bash
+# Сохранить путь к набору, пока вы находитесь в его каталоге.
+memory_kit=$(pwd -P)
+
 ./scripts/install.sh --agent dsh --no-home-agents --dry-run
 ./scripts/install.sh --agent dsh --no-home-agents
 ./scripts/check.sh --agent dsh --no-home-agents --mode global --strict
+```
 
-# Необязательно: создать память в новом проекте.
-./scripts/init-project.sh --repo /path/to/new-project --agent dsh
-./scripts/check.sh --repo /path/to/new-project --agent dsh --no-home-agents --strict
+Чтобы создать память проекта, в том же терминале перейдите в корень нового проекта. Затем выполните:
+
+```bash
+"$memory_kit/scripts/init-project.sh" --agent dsh
+"$memory_kit/scripts/check.sh" --agent dsh --no-home-agents --strict
 ```
 
 В Git Bash используйте пути вида `/c/path/to/project`, в PowerShell — `C:\path\to\project`. Пути с пробелами заключайте в кавычки. Python требуется для тестов, а не для установки.
+
+Без `Repo` / `--repo` команды `init-project` и `check` используют текущий каталог. Копировать скрипты в проект не нужно: переменная выше хранит путь к набору. В новом терминале этот путь можно взять из `KIT_ROOT` в `~/.agents/memory-kit.conf`. Явный `Repo` / `--repo` нужен, когда вы запускаете команду из другого каталога.
 
 После установки начните **новую сессию** агента в нужном проекте. Проверьте, какие стартовые файлы действительно загружены и какие общие файлы прочитаны. Порядок проверки и ограничения каждого агента описаны в [матрице совместимости](docs/harness-compatibility.md#проверка-в-реальной-сессии).
 
